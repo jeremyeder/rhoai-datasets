@@ -1,0 +1,9 @@
+name: swe-bench-pro
+source: Harbor Hub
+source_url: https://harbor-hub.com/datasets/swe-bench-pro
+task_count: 731
+domain:
+  - software-engineering
+difficulty_profile: hard
+format: harbor
+applicability: Core coding agent benchmark for software engineering capabilities

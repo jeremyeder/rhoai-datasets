@@ -1,0 +1,9 @@
+name: skillsbench-software-engineering
+source: SkillsBench
+source_url: https://github.com/microsoft/SkillsBench
+task_count: 30
+domain:
+  - software-engineering
+difficulty_profile: medium-hard
+format: skillsbench
+applicability: Software engineering tasks from Microsoft SkillsBench evaluation suite

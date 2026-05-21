@@ -1,0 +1,9 @@
+name: swe-bench-verified
+source: Harbor Hub
+source_url: https://harbor-hub.com/datasets/swe-bench-verified
+task_count: 500
+domain:
+  - software-engineering
+difficulty_profile: hard
+format: harbor
+applicability: Verified subset of SWE-bench with high-quality software engineering tasks

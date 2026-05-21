@@ -1,0 +1,9 @@
+name: skillsbench-data-science
+source: SkillsBench
+source_url: https://github.com/microsoft/SkillsBench
+task_count: 15
+domain:
+  - data-science
+difficulty_profile: medium
+format: skillsbench
+applicability: Data science and machine learning agent evaluation tasks

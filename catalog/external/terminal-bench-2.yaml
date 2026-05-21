@@ -1,0 +1,11 @@
+name: terminal-bench-2
+source: Harbor Hub
+source_url: https://harbor-hub.com/datasets/terminal-bench-2
+task_count: 89
+domain:
+  - terminal
+  - cli
+  - system-administration
+difficulty_profile: hard
+format: harbor
+applicability: High applicability for RHOAI CLI tooling and system administration tasks

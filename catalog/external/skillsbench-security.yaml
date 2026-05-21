@@ -1,0 +1,10 @@
+name: skillsbench-security
+source: SkillsBench
+source_url: https://github.com/microsoft/SkillsBench
+task_count: 8
+domain:
+  - security
+  - vulnerability-detection
+difficulty_profile: medium
+format: skillsbench
+applicability: Relevant for RHAIIS safety and security vulnerability detection

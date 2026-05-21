@@ -1,0 +1,10 @@
+name: medagentbench
+source: Harbor Hub
+source_url: https://harbor-hub.com/datasets/medagentbench
+task_count: 300
+domain:
+  - medical
+  - healthcare
+difficulty_profile: medium
+format: harbor
+applicability: Healthcare and medical domain agent benchmarking

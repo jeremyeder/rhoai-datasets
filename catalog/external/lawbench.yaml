@@ -1,0 +1,9 @@
+name: lawbench
+source: Harbor Hub
+source_url: https://harbor-hub.com/datasets/lawbench
+task_count: 1000
+domain:
+  - legal
+difficulty_profile: medium
+format: harbor
+applicability: Legal domain reasoning and analysis tasks
