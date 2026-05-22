@@ -38,6 +38,9 @@ def _score_verifiability(candidate: CandidateArtifact) -> float:
     if resolution in ("Won't Fix", "Duplicate", "Cannot Reproduce"):
         return 0.1
 
+    if "merged" in raw and not raw["merged"]:
+        return 0.0
+
     if raw.get("merged"):
         score += 0.3
 
