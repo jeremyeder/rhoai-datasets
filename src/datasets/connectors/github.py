@@ -68,6 +68,8 @@ class GitHubConnector:
         for pr in prs[: limit * 3]:
             if since_dt and pr.updated_at < since_dt:
                 break
+            if not pr.merged:
+                continue
             file_list = list(pr.get_files())
             files = [f.filename for f in file_list]
             patches = {f.filename: (f.patch or "") for f in file_list}
