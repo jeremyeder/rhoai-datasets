@@ -91,6 +91,11 @@ def catalog_list(
     help="Skip AI-content detection",
 )
 @click.option(
+    "--since",
+    default=None,
+    help="Only include items updated after this date (ISO format, e.g. 2025-10-23)",
+)
+@click.option(
     "--output",
     "-o",
     type=click.Path(path_type=Path),
@@ -106,6 +111,7 @@ def recommend(
     limit: int,
     min_score: float,
     skip_ai_detection: bool,
+    since: str | None,
     output: Path | None,
 ) -> None:
     """Scan sources and recommend ground truth candidates."""
@@ -138,7 +144,10 @@ def recommend(
         connectors=connectors,
         skip_ai_detection=skip_ai_detection,
     )
-    results = pipeline.run(limit=limit, min_suitability=min_score)
+    extra_kwargs: dict[str, str] = {}
+    if since:
+        extra_kwargs["since"] = since
+    results = pipeline.run(limit=limit, min_suitability=min_score, **extra_kwargs)
 
     click.echo(f"Found {len(results)} candidates (min score: {min_score})")
     for c in results:

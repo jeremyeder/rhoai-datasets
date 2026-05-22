@@ -1,10 +1,18 @@
-"""src/datasets/connectors/github.py -- GitHub API connector."""
+"""GitHub API connector."""
 
 from __future__ import annotations
+
+from datetime import UTC, datetime
 
 from github import Github
 
 from datasets.metadata.schema import CandidateArtifact, SourceType
+
+
+def _parse_since(since: str | None) -> datetime | None:
+    if not since:
+        return None
+    return datetime.fromisoformat(since).replace(tzinfo=UTC)
 
 
 class GitHubConnector:
@@ -25,20 +33,41 @@ class GitHubConnector:
         **kwargs: str,
     ) -> list[CandidateArtifact]:
         types = artifact_types or ["pr"]
+        since = kwargs.get("since")
         candidates: list[CandidateArtifact] = []
 
         if "pr" in types:
-            candidates.extend(self._scan_prs(state=state or "closed", limit=limit))
+            candidates.extend(
+                self._scan_prs(
+                    state=state or "closed",
+                    limit=limit,
+                    since=since,
+                )
+            )
         if "issue" in types:
-            candidates.extend(self._scan_issues(state=state or "closed", limit=limit))
+            candidates.extend(
+                self._scan_issues(
+                    state=state or "closed",
+                    limit=limit,
+                    since=since,
+                )
+            )
 
         return candidates[:limit]
 
-    def _scan_prs(self, state: str, limit: int) -> list[CandidateArtifact]:
+    def _scan_prs(
+        self,
+        state: str,
+        limit: int,
+        since: str | None = None,
+    ) -> list[CandidateArtifact]:
         candidates: list[CandidateArtifact] = []
+        since_dt = _parse_since(since)
         prs = self._repo.get_pulls(state=state, sort="updated", direction="desc")
 
-        for pr in prs[:limit]:
+        for pr in prs[: limit * 3]:
+            if since_dt and pr.updated_at < since_dt:
+                break
             file_list = list(pr.get_files())
             files = [f.filename for f in file_list]
             patches = {f.filename: (f.patch or "") for f in file_list}
@@ -61,13 +90,24 @@ class GitHubConnector:
                 )
             )
 
+            if len(candidates) >= limit:
+                break
+
         return candidates
 
-    def _scan_issues(self, state: str, limit: int) -> list[CandidateArtifact]:
+    def _scan_issues(
+        self,
+        state: str,
+        limit: int,
+        since: str | None = None,
+    ) -> list[CandidateArtifact]:
         candidates: list[CandidateArtifact] = []
+        since_dt = _parse_since(since)
         issues = self._repo.get_issues(state=state, sort="updated", direction="desc")
 
-        for issue in issues[:limit]:
+        for issue in issues[: limit * 3]:
+            if since_dt and issue.updated_at < since_dt:
+                break
             if issue.pull_request:
                 continue
             candidates.append(
@@ -83,5 +123,8 @@ class GitHubConnector:
                     },
                 )
             )
+
+            if len(candidates) >= limit:
+                break
 
         return candidates
