@@ -49,3 +49,53 @@ def test_wontfix_penalizes_verifiability():
     )
     score = score_candidate(candidate)
     assert score.verifiability < 0.3
+
+
+def test_unmerged_pr_scores_zero_verifiability():
+    candidate = CandidateArtifact(
+        source_type=SourceType.github_pr,
+        source_url="https://github.com/org/repo/pull/99",
+        title="Draft: something",
+        description="WIP",
+        raw_data={"merged": False, "files": [], "patches": {}},
+    )
+    score = score_candidate(candidate)
+    assert score.verifiability == 0.0
+
+
+def test_difficulty_scales_with_patch_size():
+    """Large patches score higher difficulty than trivial ones."""
+    small = CandidateArtifact(
+        source_type=SourceType.github_pr,
+        source_url="https://github.com/org/repo/pull/1",
+        title="Fix typo",
+        description="Fix a typo.",
+        raw_data={
+            "merged": True,
+            "files": ["README.md"],
+            "patches": {"README.md": "+fixed\n-fixd"},
+        },
+    )
+    large = CandidateArtifact(
+        source_type=SourceType.github_pr,
+        source_url="https://github.com/org/repo/pull/2",
+        title="Refactor auth system",
+        description="Major refactor of auth.",
+        raw_data={
+            "merged": True,
+            "files": [
+                "pkg/auth/handler.go",
+                "pkg/auth/middleware.go",
+                "pkg/auth/rbac.go",
+                "pkg/controller/main.go",
+                "tests/auth_test.go",
+            ],
+            "patches": {
+                f"pkg/auth/{f}.go": "\n".join(f"+line{i}" for i in range(80))
+                for f in ["handler", "middleware", "rbac"]
+            },
+        },
+    )
+    small_score = score_candidate(small)
+    large_score = score_candidate(large)
+    assert large_score.difficulty > small_score.difficulty
