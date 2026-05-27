@@ -195,8 +195,8 @@ uv run datasets recommend --source github --repo org/repo --skip-ai-detection -o
 
 ```bash
 # Setup
-git clone https://github.com/jeremyeder/rhoai-datasets.git
-cd rhoai-datasets
+git clone https://github.com/jeremyeder/rhai-datasets.git
+cd rhai-datasets
 uv sync --extra all
 
 # Run checks
