@@ -13,6 +13,7 @@ Dataset creation and curation platform for Red Hat AI evaluation.
 - `uv run ruff check src/ tests/` -- lint
 - `uv run mypy src/` -- type check
 - `uv run datasets recommend --source github --repo org/repo` -- scan for candidates
+- `uv run datasets recommend --source github --repo org/repo --since 2025-01-01` -- scan with date filter
 - `uv run datasets create --from-file candidates.json --format harbor` -- create datasets
 - `uv run datasets catalog list` -- browse external dataset catalog
 
@@ -26,6 +27,7 @@ Dataset creation and curation platform for Red Hat AI evaluation.
   - Protocol-based: all implement `SourceConnector` (name, scan method)
   - GitHubConnector scans PRs/issues, JiraConnector scans tickets
 - `src/datasets/recommender/` -- suitability scoring + AI-content detection pipeline
+  - Pipeline: orchestrates scoring → AI detection → ranking
   - Scorer: 5 dimensions (clarity, verifiability, difficulty, domain_relevance, completeness)
   - AI detection: LLM-as-judge pattern using Claude API (requires ANTHROPIC_API_KEY)
 - `src/datasets/factory/` -- format-specific output (Harbor, SkillsBench, MLflow)
@@ -51,4 +53,4 @@ Dataset creation and curation platform for Red Hat AI evaluation.
 - GitHub connector filters out PRs when scanning issues
 - Enums use StrEnum (Python 3.11+), not `str, enum.Enum`
 - 10 E501 line-length violations remain in string literals (intentional — shell scripts and prompts)
-- 7 mypy errors remain (missing stubs for yaml/jira, type annotations in PyGithub iterators)
+- 8 mypy errors remain (missing stubs for yaml, untyped jira call, Any return, PyGithub annotations, cli arg-type)
