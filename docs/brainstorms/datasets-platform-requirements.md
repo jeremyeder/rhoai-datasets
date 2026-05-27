@@ -15,7 +15,7 @@ A dataset creation and curation platform that helps Red Hat AI teams build evalu
 
 Component teams across RHOAI, RHEL AI, and RHAIIS need evaluation datasets to establish agent baselines and run systematic optimization. Three evaluation ecosystems exist -- Harbor (containerized agent tasks), SkillsBench (skills effectiveness), and EvalHub+MLflow (model quality/safety benchmarks) -- but no tooling exists to help teams source good ground truth candidates from their own work, flag AI-generated content in those sources, or produce datasets in the right format for each backend.
 
-Without this, teams either skip evaluation entirely, hand-craft a few test cases that don't generalize, or adopt public benchmarks that don't reflect their domain. The retort project proved that DoE-driven optimization works (fractional factorial designs, ANOVA, Pareto frontiers), but it assumed datasets already existed. This repo addresses the upstream gap.
+Without this, teams either skip evaluation entirely, hand-craft a few test cases that don't generalize, or adopt public benchmarks that don't reflect their domain. Earlier prototyping proved that DoE-driven optimization works (fractional factorial designs, ANOVA, Pareto frontiers), but it assumed datasets already existed. This repo addresses the upstream gap.
 
 ---
 
@@ -123,7 +123,7 @@ Without this, teams either skip evaluation entirely, hand-craft a few test cases
 - **DoE orchestration** -- that's agent-eval-harness. This repo does not run experiments, compute ANOVA, or find Pareto frontiers.
 - **Benchmark execution** -- that's Harbor/EvalHub. This repo does not execute tasks or score agent output.
 - **Results storage** -- that's MLflow. This repo does not store experiment results or metrics.
-- **The retort engine itself** -- retort is a reference for how DoE works, not a dependency. The DoE concepts (fractional factorial design, factor permutation) live in agent-eval-harness.
+- **DoE execution** -- fractional factorial design, factor permutation, ANOVA, and Pareto analysis are out of scope for this repo.
 
 ---
 
