@@ -5,32 +5,17 @@ from __future__ import annotations
 import re
 
 from datasets.metadata.schema import CandidateArtifact, SuitabilityScore
+from datasets.patterns import TEST_FILE_RE
 
 
 def _source_files(files: list[str]) -> list[str]:
     """Filter to source files, excluding test files."""
-    return [
-        f
-        for f in files
-        if not re.search(
-            r"(^|/)tests?[/_]|_test\.|test_|\btestutils\b",
-            f,
-            re.IGNORECASE,
-        )
-    ]
+    return [f for f in files if not TEST_FILE_RE.search(f)]
 
 
 def _test_files(files: list[str]) -> list[str]:
     """Filter to test files only."""
-    return [
-        f
-        for f in files
-        if re.search(
-            r"(^|/)tests?[/_]|_test\.|test_",
-            f,
-            re.IGNORECASE,
-        )
-    ]
+    return [f for f in files if TEST_FILE_RE.search(f)]
 
 
 def _patch_line_count(patches: dict[str, str]) -> int:

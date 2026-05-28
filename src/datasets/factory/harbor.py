@@ -9,8 +9,8 @@ import textwrap
 from pathlib import Path
 
 from datasets.metadata.schema import CandidateArtifact
+from datasets.patterns import TEST_FILE_RE
 
-_TEST_FILE_RE = re.compile(r"(^|/)tests?[/_]|_test\.|test_", re.IGNORECASE)
 _SAFE_FILENAME_RE = re.compile(r"^[A-Za-z0-9_.\-]+$")
 
 
@@ -108,16 +108,25 @@ class HarborTaskFactory:
         test_patches = {
             fname: patch
             for fname, patch in patches.items()
-            if _TEST_FILE_RE.search(fname)
+            if TEST_FILE_RE.search(fname)
         }
 
         extracted_names: list[str] = []
+        seen_names: set[str] = set()
         for filepath, patch in test_patches.items():
             filename = Path(filepath).name
             if not _SAFE_FILENAME_RE.fullmatch(filename):
                 continue
+            if filename in seen_names:
+                stem = Path(filename).stem
+                suffix = Path(filename).suffix
+                counter = 1
+                while f"{stem}_{counter}{suffix}" in seen_names:
+                    counter += 1
+                filename = f"{stem}_{counter}{suffix}"
             content = _extract_added_lines(patch)
             if content.strip():
+                seen_names.add(filename)
                 (tests_dir / filename).write_text(content)
                 extracted_names.append(filename)
 
@@ -155,7 +164,7 @@ class HarborTaskFactory:
         source_patches = {
             fname: patch
             for fname, patch in patches.items()
-            if not _TEST_FILE_RE.search(fname) and patch.strip()
+            if not TEST_FILE_RE.search(fname) and patch.strip()
         }
 
         if source_patches:

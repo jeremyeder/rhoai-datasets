@@ -8,8 +8,8 @@ from datetime import UTC, datetime
 from github import Github
 
 from datasets.metadata.schema import CandidateArtifact, SourceType
+from datasets.patterns import TEST_FILE_RE
 
-_TEST_FILE_RE = re.compile(r"(^|/)tests?[/_]|_test\.|test_", re.IGNORECASE)
 _DOCS_CONFIG_RE = re.compile(
     r"\.(md|txt|yaml|yml|json|toml|cfg|ini|lock)$"
     r"|^(README|LICENSE|CHANGELOG|OWNERS|CODEOWNERS|\.)",
@@ -25,7 +25,7 @@ def _parse_since(since: str | None) -> datetime | None:
 
 
 def _has_test_files(filenames: list[str]) -> bool:
-    return any(_TEST_FILE_RE.search(f) for f in filenames)
+    return any(TEST_FILE_RE.search(f) for f in filenames)
 
 
 def _is_docs_config_only(filenames: list[str]) -> bool:
@@ -33,7 +33,7 @@ def _is_docs_config_only(filenames: list[str]) -> bool:
 
 
 def _source_file_count(filenames: list[str]) -> int:
-    return sum(1 for f in filenames if not _TEST_FILE_RE.search(f))
+    return sum(1 for f in filenames if not TEST_FILE_RE.search(f))
 
 
 class GitHubConnector:
@@ -86,7 +86,7 @@ class GitHubConnector:
         since_dt = _parse_since(since)
         prs = self._repo.get_pulls(state=state, sort="updated", direction="desc")
 
-        for pr in prs[: limit * 3]:
+        for pr in prs[: limit * 10]:
             if since_dt and pr.updated_at < since_dt:
                 break
             if not pr.merged:
