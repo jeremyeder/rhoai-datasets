@@ -1,0 +1,76 @@
+prompt: '# chore: promote stable to rhoai
+
+
+  Automated promotion of **5 commit(s)** from `stable` to `rhoai`.
+
+
+  ```
+
+  07cd553 chore: add `odh-stable` tekton push config (#877)
+
+  2b2c9e4 chore: post-split RBAC audit, nil CR fixes, and lifecycle observability
+  (#881)
+
+  cb9b3fc chore: cleanup kustomize manifests for duplicate overlays (#840)
+
+  49fd63e feat: mask Authorization header in logs (#760)
+
+  ```
+
+
+
+  ## Files involved
+
+  - `.tekton/odh-maas-api-push-stable.yaml`
+
+  - `.tekton/odh-maas-api-push.yaml`
+
+  - `.tekton/odh-maas-controller-push-stable.yaml`
+
+  - `.tekton/odh-maas-controller-push.yaml`
+
+  - `deployment/base/maas-api/overlays/tls/README.md`
+
+  - `deployment/components/shared-patches/kustomization.yaml`
+
+  - `deployment/overlays/odh/kustomization.yaml`
+
+  - `docs/content/advanced-administration/observability.md`
+
+  - `docs/content/configuration-and-management/authorino-caching.md`
+
+  - `docs/content/install/maas-setup.md`
+
+  - `maas-api/cmd/main.go`
+
+  - `maas-api/internal/handlers/models.go`
+
+  - `maas-api/internal/logger/logger.go`
+
+  - `maas-api/internal/logger/redaction.go`
+
+  - `maas-api/internal/logger/redaction_test.go`
+
+  - `maas-api/internal/middleware/request_id.go`
+
+  - `maas-api/internal/middleware/request_id_test.go`
+
+  - `maas-api/internal/models/discovery.go`
+
+  - `maas-controller/README.md`
+
+  - `maas-controller/cmd/manager/main.go`
+
+  - `maas-controller/pkg/controller/maas/maasauthpolicy_controller.go`
+
+  - `maas-controller/pkg/controller/maas/maasauthpolicy_controller_test.go`
+
+  - `maas-controller/pkg/controller/maas/self_deployment_controller.go`
+
+  - `maas-controller/pkg/controller/maas/self_deployment_controller_test.go`
+
+  - `maas-controller/pkg/controller/maas/tenant_controller.go`
+
+  - `scripts/ci/validate-manifests.sh`
+
+  '

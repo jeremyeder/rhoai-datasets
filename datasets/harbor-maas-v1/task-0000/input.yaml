@@ -1,0 +1,344 @@
+prompt: "# test: add E2E tests for Tenant CR lifecycle\n\n## Summary\n\nAdds E2E test\
+  \ suite for Tenant CR lifecycle validation as part of the test ownership reorganization\
+  \ ([RHOAIENG-60709](https://redhat.atlassian.net/browse/RHOAIENG-60709)).\n\nRelated\
+  \ to https://redhat.atlassian.net/browse/RHOAIENG-59867\n\n## Changes\n\n- **test/e2e/tests/test_tenant.py**\
+  \ - 7 integration tests covering:\n  - Tenant singleton existence\n  - Ready condition\
+  \ and phase validation\n  - Payload processing deployment checks (when Active)\n\
+  \  - Status contract compliance (phase, conditions)\n  - Spec well-formedness\n\
+  \  - Kubernetes metav1 condition shape\n  - False ownership prevention (MaaS CRs\
+  \ not owned by Tenant)\n\n- **test/e2e/README.md** - Streamlined documentation focusing\
+  \ on test execution\n\n- **test/e2e/scripts/prow_run_smoke_test.sh** - Enhanced\
+  \ to include Tenant tests in CI\n\n## Test Results\n\nValidated on live OpenShift\
+  \ cluster with operator-based deployment:\n\n- \u2705 5 passing (contract tests,\
+  \ ownership validation, singleton checks)\n- \u23ED\uFE0F 1 skipped (payload-processing\
+  \ not deployed)\n- **Time:** ~5s when Tenant is healthy\n\n## Test Ownership Context\n\
+  \nThis PR is part of Phase 1 (Tenant Tests) of the E2E test ownership reorganization:\n\
+  - Establishes baseline Tenant CR testing in MaaS CI\n- Validates contract between\
+  \ maas-controller and Tenant CR\n- Provides foundation for operator CI contract\
+  \ tests (Phase 2)\n\nDSC enable/disable and Tenant deletion lifecycle remain in\
+  \ operator CI scope.\n\n## How to Run\n\n```bash\ncd test/e2e\nexport DEPLOYMENT_NAMESPACE=\"\
+  opendatahub\"  # or wherever Tenant lives\nsource .venv/bin/activate\npytest tests/test_tenant.py\
+  \ -v\n```\n\nFull smoke test (includes all E2E modules):\n```bash\n./test/e2e/scripts/prow_run_smoke_test.sh\n\
+  ```\n\n<h3 class=\"mt-6 [mb-2](https://redhat.atlassian.net/browse/mb-2) font-semibold\
+  \ text-xl\" data-streamdown=\"heading-3\" style=\"--tw-space-y-reverse: 0; margin-block:\
+  \ 0px 16px; margin-bottom: 8px; font-size: 1.15em; line-height: 1.25; --tw-font-weight:\
+  \ 600; font-weight: 600; color: rgba(228, 228, 228, 0.92); margin-top: 18px; font-family:\
+  \ -apple-system, &quot;system-ui&quot;, sans-serif; font-style: normal; font-variant-ligatures:\
+  \ normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align:\
+  \ start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:\
+  \ 0px; white-space: normal; background-color: rgb(24, 24, 24); text-decoration-thickness:\
+  \ initial; text-decoration-style: initial; text-decoration-color: initial;\">Targeted\
+  \ E2E (<code class=\"md-clickable-code md-inline-path-filename-like\" role=\"button\"\
+  \ tabindex=\"0\" style=\"padding: 1.5px 4px; border-radius: 5px; background-color:\
+  \ color(srgb 0.894118 0.894118 0.894118 / 0.0737255); color: rgb(129, 161, 193);\
+  \ font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 0.9em;\
+  \ line-height: 1.4; word-break: break-all; cursor: pointer;\"><span class=\"md-inline-path-filename\"\
+  >test_tenant.py</span></code>,<span>\_</span><code class=\"md-clickable-code md-inline-path-filename-like\"\
+  \ role=\"button\" tabindex=\"0\" style=\"padding: 1.5px 4px; border-radius: 5px;\
+  \ background-color: color(srgb 0.894118 0.894118 0.894118 / 0.0737255); color: rgb(129,\
+  \ 161, 193); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size:\
+  \ 0.9em; line-height: 1.4; word-break: break-all; cursor: pointer;\"><span class=\"\
+  md-inline-path-filename\">test_config_tenant.py</span></code>)</h3><p style=\"--tw-space-y-reverse:\
+  \ 0; margin-block: 0px 16px; margin: 6px 0px; word-break: break-word; color: rgba(228,\
+  \ 228, 228, 0.92); font-family: -apple-system, &quot;system-ui&quot;, sans-serif;\
+  \ font-size: 13px; font-style: normal; font-variant-ligatures: normal; font-variant-caps:\
+  \ normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start;\
+  \ text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:\
+  \ 0px; white-space: normal; background-color: rgb(24, 24, 24); text-decoration-thickness:\
+  \ initial; text-decoration-style: initial; text-decoration-color: initial;\">After\
+  \ kustomize deploy on a fresh cluster:</p><div class=\"composer-message-codeblock\"\
+  \ style=\"--tw-space-y-reverse: 0; margin-block: 0px 16px; margin-top: 8px; margin-bottom:\
+  \ 8px; color: rgba(228, 228, 228, 0.92); font-family: -apple-system, &quot;system-ui&quot;,\
+  \ sans-serif; font-size: 13px; font-style: normal; font-variant-ligatures: normal;\
+  \ font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans:\
+  \ 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing:\
+  \ 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(24,\
+  \ 24, 24); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color:\
+  \ initial;\"><div class=\"ui-code-block\" style=\"position: relative; margin-top:\
+  \ 0px; margin-bottom: 0px; border-radius: 8px; border-color: color(srgb 0.894118\
+  \ 0.894118 0.894118 / 0.0737255); border-style: solid; border-width: 0.833333px;\
+  \ border-image: none 100% / 1 / 0 stretch; overflow: hidden; background-color: rgb(24,\
+  \ 24, 24); min-height: 106px;\"><div class=\"ui-code-block-content\" style=\"position:\
+  \ relative; min-height: 106px;\"><div class=\"ui-scroll-area\" data-scroll-padding=\"\
+  4\" data-visibility=\"hover\" data-direction=\"horizontal\" style=\"--scrollbar-size:\
+  \ 6px; --scrollbar-inset: 1px; --scrollbar-thumb-top-offset: 6px; --scroll-area-scroll-padding:\
+  \ 4px; position: relative; overflow: hidden; display: grid; grid-template: 1fr /\
+  \ 1fr;\"><div class=\"ui-scroll-area__viewport\" style=\"grid-area: 1 / 1; min-height:\
+  \ 0px; max-height: 100%; border-radius: inherit; overflow: auto hidden; scroll-padding:\
+  \ 0px 4px; overscroll-behavior: contain auto; scrollbar-width: none !important;\"\
+  ><div class=\"ui-scroll-area__content\" style=\"box-sizing: border-box; width: max-content;\
+  \ min-width: 100%; max-width: none; min-height: 100%; display: flex; flex-direction:\
+  \ row; height: fit-content;\"><div class=\"ui-default-code ui-code-block-default-code\"\
+  \ style=\"min-width: 100%; width: max-content; background: rgb(24, 24, 24); min-height:\
+  \ 116px; padding: 6px 0px; font-size: 12px; font-weight: normal; line-height: 20px;\
+  \ contain: layout style paint; tab-size: 4; font-family: Menlo, Monaco, &quot;Courier\
+  \ New&quot;, monospace; --shiki-foreground: rgba(228, 228, 228, 0.92); --shiki-background:\
+  \ transparent; --shiki-token-constant: #f8c762; --shiki-token-string: #E394DC; --shiki-token-comment:\
+  \ #E4E4E45E; --shiki-token-keyword: #82D2CE; --shiki-token-parameter: #D6D6DD; --shiki-token-function:\
+  \ #EFB080; --shiki-token-string-expression: #E394DC; --shiki-token-punctuation:\
+  \ rgba(228, 228, 228, 0.92); --shiki-token-link: #87c3ff; --shiki-token-tag: #82D2CE;\
+  \ --shiki-token-attribute: #AAA0FA; --shiki-token-property: #AAA0FA; --shiki-token-type:\
+  \ #EFB080; --shiki-token-variable: #87C3FF; --shiki-token-class: #EFB080; --shiki-token-language-variable:\
+  \ #CC7C8A; --shiki-token-constant-variable: #AAA0FA; --ui-default-code-tab-size:\
+  \ 4;\"><div class=\"ui-default-code__content\" style=\"min-width: fit-content; contain:\
+  \ layout style;\"><div class=\"ui-default-code__line\" style=\"display: flex; min-height:\
+  \ 20px;\"><div class=\"ui-default-code__line-content\" style=\"flex: 1 1 0%; white-space:\
+  \ pre; overflow: hidden; text-overflow: ellipsis; padding-left: 6px; color: rgba(228,\
+  \ 228, 228, 0.92); padding-right: 8px; position: relative;\"><span style=\"color:\
+  \ rgb(239, 176, 128);\">cd</span><span style=\"color: rgba(228, 228, 228, 0.92);\"\
+  > </span><span style=\"color: rgb(227, 148, 220);\">test/e2e</span><span style=\"\
+  color: rgba(228, 228, 228, 0.92);\"> </span><span style=\"color: rgba(228, 228,\
+  \ 228, 0.92);\">&amp;&amp;</span><span style=\"color: rgba(228, 228, 228, 0.92);\"\
+  > </span><span style=\"color: rgb(239, 176, 128);\">source</span><span style=\"\
+  color: rgba(228, 228, 228, 0.92);\"> </span><span style=\"color: rgb(227, 148, 220);\"\
+  >.venv/bin/activate</span><span style=\"color: rgba(228, 228, 228, 0.92);\"> </span><span\
+  \ style=\"color: rgba(228, 228, 228, 0.92);\">&amp;&amp;</span><span style=\"color:\
+  \ rgba(228, 228, 228, 0.92);\"> </span><span style=\"color: rgb(239, 176, 128);\"\
+  >pip</span><span style=\"color: rgba(228, 228, 228, 0.92);\"> </span><span style=\"\
+  color: rgb(227, 148, 220);\">install</span><span style=\"color: rgba(228, 228, 228,\
+  \ 0.92);\"> </span><span style=\"color: rgb(248, 199, 98);\">-r</span><span style=\"\
+  color: rgba(228, 228, 228, 0.92);\"> </span><span style=\"color: rgb(227, 148, 220);\"\
+  >requirements.txt</span></div></div><div class=\"ui-default-code__line\" style=\"\
+  display: flex; min-height: 20px;\"><div class=\"ui-default-code__line-content\"\
+  \ style=\"flex: 1 1 0%; white-space: pre; overflow: hidden; text-overflow: ellipsis;\
+  \ padding-left: 6px; color: rgba(228, 228, 228, 0.92); padding-right: 8px; position:\
+  \ relative;\"><span style=\"color: rgb(130, 210, 206);\">export</span><span style=\"\
+  color: rgba(228, 228, 228, 0.92);\"> </span><span style=\"color: rgb(135, 195, 255);\"\
+  >MAAS_SUBSCRIPTION_NAMESPACE</span><span style=\"color: rgba(228, 228, 228, 0.92);\"\
+  >=</span><span style=\"color: rgb(135, 195, 255);\">models-as-a-service</span></div></div><div\
+  \ class=\"ui-default-code__line\" style=\"display: flex; min-height: 20px;\"><div\
+  \ class=\"ui-default-code__line-content\" style=\"flex: 1 1 0%; white-space: pre;\
+  \ overflow: hidden; text-overflow: ellipsis; padding-left: 6px; color: rgba(228,\
+  \ 228, 228, 0.92); padding-right: 8px; position: relative;\"><span style=\"color:\
+  \ rgb(130, 210, 206);\">export</span><span style=\"color: rgba(228, 228, 228, 0.92);\"\
+  > </span><span style=\"color: rgb(135, 195, 255);\">DEPLOYMENT_NAMESPACE</span><span\
+  \ style=\"color: rgba(228, 228, 228, 0.92);\">=</span><span style=\"color: rgb(135,\
+  \ 195, 255);\">opendatahub</span></div></div><div class=\"ui-default-code__line\"\
+  \ style=\"display: flex; min-height: 20px;\"><div class=\"ui-default-code__line-content\"\
+  \ style=\"flex: 1 1 0%; white-space: pre; overflow: hidden; text-overflow: ellipsis;\
+  \ padding-left: 6px; color: rgba(228, 228, 228, 0.92); padding-right: 8px; position:\
+  \ relative;\"><span style=\"color: rgb(130, 210, 206);\">export</span><span style=\"\
+  color: rgba(228, 228, 228, 0.92);\"> </span><span style=\"color: rgb(135, 195, 255);\"\
+  >GATEWAY_NAMESPACE</span><span style=\"color: rgba(228, 228, 228, 0.92);\">=</span><span\
+  \ style=\"color: rgb(135, 195, 255);\">openshift-ingress</span></div></div><div\
+  \ class=\"ui-default-code__line\" style=\"display: flex; min-height: 20px;\"><div\
+  \ class=\"ui-default-code__line-content\" style=\"flex: 1 1 0%; white-space: pre;\
+  \ overflow: hidden; text-overflow: ellipsis; padding-left: 6px; color: rgba(228,\
+  \ 228, 228, 0.92); padding-right: 8px; position: relative;\"><span style=\"color:\
+  \ rgb(135, 195, 255);\">PYTHONPATH</span><span style=\"color: rgba(228, 228, 228,\
+  \ 0.92);\">=</span><span style=\"color: rgb(227, 148, 220);\">tests</span><span\
+  \ style=\"color: rgba(228, 228, 228, 0.92);\"> </span><span style=\"color: rgb(239,\
+  \ 176, 128);\">pytest</span><span style=\"color: rgba(228, 228, 228, 0.92);\"> </span><span\
+  \ style=\"color: rgb(227, 148, 220);\">tests/test_tenant.py</span><span style=\"\
+  color: rgba(228, 228, 228, 0.92);\"> </span><span style=\"color: rgb(227, 148, 220);\"\
+  >tests/test_config_tenant.py</span><span style=\"color: rgba(228, 228, 228, 0.92);\"\
+  > </span><span style=\"color: rgb(248, 199, 98);\">-v</span><span style=\"color:\
+  \ rgba(228, 228, 228, 0.92);\"> </span><span style=\"color: rgb(248, 199, 98);\"\
+  >--tb=short</span></div></div></div></div></div></div></div></div></div></div><p\
+  \ style=\"--tw-space-y-reverse: 0; margin-block: 0px 16px; margin: 6px 0px; word-break:\
+  \ break-word; color: rgba(228, 228, 228, 0.92); font-family: -apple-system, &quot;system-ui&quot;,\
+  \ sans-serif; font-size: 13px; font-style: normal; font-variant-ligatures: normal;\
+  \ font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans:\
+  \ 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing:\
+  \ 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(24,\
+  \ 24, 24); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color:\
+  \ initial;\"><span class=\"font-semibold\" data-streamdown=\"strong\" style=\"--tw-font-weight:\
+  \ 600; font-weight: 600;\">Result:</span><span>\_</span><code class=\"\" style=\"\
+  padding: 1.5px 4px; border-radius: 5px; background-color: color(srgb 0.894118 0.894118\
+  \ 0.894118 / 0.0737255); color: color(srgb 0.894118 0.894118 0.894118 / 0.866275);\
+  \ font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 0.9em;\
+  \ line-height: 1.4; word-break: break-all;\">10 passed, 1 skipped</code><span>\_\
+  </span>(~9s)</p><div class=\"ui-scroll-area\" data-scroll-padding=\"4\" data-visibility=\"\
+  hover\" data-direction=\"horizontal\" style=\"--tw-space-y-reverse: 0; margin-block:\
+  \ 0px 16px; --scrollbar-size: 6px; --scrollbar-inset: 0px; --scrollbar-thumb-top-offset:\
+  \ 6px; --scroll-area-scroll-padding: 4px; position: relative; overflow: hidden;\
+  \ display: grid; grid-template: 1fr / 1fr; margin: 1em 0px; border-color: color(srgb\
+  \ 0.894118 0.894118 0.894118 / 0.0737255); border-style: solid; border-width: 0.833333px;\
+  \ border-image: none 100% / 1 / 0 stretch; border-radius: 6px; color: rgba(228,\
+  \ 228, 228, 0.92); font-family: -apple-system, &quot;system-ui&quot;, sans-serif;\
+  \ font-size: 13px; font-style: normal; font-variant-ligatures: normal; font-variant-caps:\
+  \ normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start;\
+  \ text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:\
+  \ 0px; white-space: normal; background-color: rgb(24, 24, 24); text-decoration-thickness:\
+  \ initial; text-decoration-style: initial; text-decoration-color: initial;\"><div\
+  \ class=\"ui-scroll-area__viewport\" style=\"grid-area: 1 / 1; min-height: 0px;\
+  \ max-height: 100%; border-radius: inherit; overflow: auto hidden; scroll-padding:\
+  \ 0px 4px; overscroll-behavior: contain auto; scrollbar-width: none !important;\"\
+  ><div class=\"ui-scroll-area__content\" style=\"box-sizing: border-box; width: auto;\
+  \ min-width: 100%; max-width: 100%; min-height: 100%; display: flex; flex-direction:\
+  \ row; height: fit-content;\">\nModule | Outcome\n-- | --\ntest_tenant.py | 6 passed;\
+  \ 1 skipped (test_payload_processing_deployed_with_active_tenant\_\u2014 Tenant\
+  \ phase not\_Active)\ntest_config_tenant.py | 4 passed (Config/default\_present,\
+  \ not terminating; owner refs on\_default-tenant\_and\_maas-controller\_Deployment)\n\
+  \n</div></div></div><h3 class=\"mt-6 [mb-2](https://redhat.atlassian.net/browse/mb-2)\
+  \ font-semibold text-xl\" data-streamdown=\"heading-3\" style=\"--tw-space-y-reverse:\
+  \ 0; margin-block: 0px 16px; margin-bottom: 8px; font-size: 1.15em; line-height:\
+  \ 1.25; --tw-font-weight: 600; font-weight: 600; color: rgba(228, 228, 228, 0.92);\
+  \ margin-top: 18px; font-family: -apple-system, &quot;system-ui&quot;, sans-serif;\
+  \ font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal;\
+  \ letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform:\
+  \ none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space:\
+  \ normal; background-color: rgb(24, 24, 24); text-decoration-thickness: initial;\
+  \ text-decoration-style: initial; text-decoration-color: initial;\">Full smoke (CI-equivalent)</h3><div\
+  \ class=\"composer-message-codeblock\" style=\"--tw-space-y-reverse: 0; margin-block:\
+  \ 0px 16px; margin-top: 8px; margin-bottom: 8px; color: rgba(228, 228, 228, 0.92);\
+  \ font-family: -apple-system, &quot;system-ui&quot;, sans-serif; font-size: 13px;\
+  \ font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal;\
+  \ font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent:\
+  \ 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:\
+  \ 0px; white-space: normal; background-color: rgb(24, 24, 24); text-decoration-thickness:\
+  \ initial; text-decoration-style: initial; text-decoration-color: initial;\"><div\
+  \ class=\"ui-code-block\" style=\"position: relative; margin-top: 0px; margin-bottom:\
+  \ 0px; border-radius: 8px; border-color: color(srgb 0.894118 0.894118 0.894118 /\
+  \ 0.0737255); border-style: solid; border-width: 0.833333px; border-image: none\
+  \ 100% / 1 / 0 stretch; overflow: hidden; background-color: rgb(24, 24, 24); min-height:\
+  \ 26px;\"><div class=\"ui-code-block-content\" style=\"position: relative; min-height:\
+  \ 26px;\"><div class=\"ui-scroll-area\" data-scroll-padding=\"4\" data-visibility=\"\
+  hover\" data-direction=\"horizontal\" style=\"--scrollbar-size: 6px; --scrollbar-inset:\
+  \ 1px; --scrollbar-thumb-top-offset: 6px; --scroll-area-scroll-padding: 4px; position:\
+  \ relative; overflow: hidden; display: grid; grid-template: 1fr / 1fr;\"><div class=\"\
+  ui-scroll-area__viewport\" style=\"grid-area: 1 / 1; min-height: 0px; max-height:\
+  \ 100%; border-radius: inherit; overflow: auto hidden; scroll-padding: 0px 4px;\
+  \ overscroll-behavior: contain auto; scrollbar-width: none !important;\"><div class=\"\
+  ui-scroll-area__content\" style=\"box-sizing: border-box; width: max-content; min-width:\
+  \ 100%; max-width: none; min-height: 100%; display: flex; flex-direction: row; height:\
+  \ fit-content;\"><div class=\"ui-default-code ui-code-block-default-code\" style=\"\
+  min-width: 100%; width: max-content; background: rgb(24, 24, 24); min-height: 36px;\
+  \ padding: 6px 0px; font-size: 12px; font-weight: normal; line-height: 20px; contain:\
+  \ layout style paint; tab-size: 4; font-family: Menlo, Monaco, &quot;Courier New&quot;,\
+  \ monospace; --shiki-foreground: rgba(228, 228, 228, 0.92); --shiki-background:\
+  \ transparent; --shiki-token-constant: #f8c762; --shiki-token-string: #E394DC; --shiki-token-comment:\
+  \ #E4E4E45E; --shiki-token-keyword: #82D2CE; --shiki-token-parameter: #D6D6DD; --shiki-token-function:\
+  \ #EFB080; --shiki-token-string-expression: #E394DC; --shiki-token-punctuation:\
+  \ rgba(228, 228, 228, 0.92); --shiki-token-link: #87c3ff; --shiki-token-tag: #82D2CE;\
+  \ --shiki-token-attribute: #AAA0FA; --shiki-token-property: #AAA0FA; --shiki-token-type:\
+  \ #EFB080; --shiki-token-variable: #87C3FF; --shiki-token-class: #EFB080; --shiki-token-language-variable:\
+  \ #CC7C8A; --shiki-token-constant-variable: #AAA0FA; --ui-default-code-tab-size:\
+  \ 4;\"><div class=\"ui-default-code__content\" style=\"min-width: fit-content; contain:\
+  \ layout style;\"><div class=\"ui-default-code__line\" style=\"display: flex; min-height:\
+  \ 20px;\"><div class=\"ui-default-code__line-content\" style=\"flex: 1 1 0%; white-space:\
+  \ pre; overflow: hidden; text-overflow: ellipsis; padding-left: 6px; color: rgba(228,\
+  \ 228, 228, 0.92); padding-right: 8px; position: relative;\"><span style=\"color:\
+  \ rgb(135, 195, 255);\">SKIP_DEPLOYMENT</span><span style=\"color: rgba(228, 228,\
+  \ 228, 0.92);\">=</span><span style=\"color: rgb(227, 148, 220);\">true</span><span\
+  \ style=\"color: rgba(228, 228, 228, 0.92);\"> </span><span style=\"color: rgb(239,\
+  \ 176, 128);\">./test/e2e/scripts/prow_run_smoke_test.sh</span></div></div></div></div></div></div></div></div></div></div><p\
+  \ style=\"--tw-space-y-reverse: 0; margin-block: 0px 16px; margin: 6px 0px; word-break:\
+  \ break-word; color: rgba(228, 228, 228, 0.92); font-family: -apple-system, &quot;system-ui&quot;,\
+  \ sans-serif; font-size: 13px; font-style: normal; font-variant-ligatures: normal;\
+  \ font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans:\
+  \ 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing:\
+  \ 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(24,\
+  \ 24, 24); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color:\
+  \ initial;\"><span class=\"font-semibold\" data-streamdown=\"strong\" style=\"--tw-font-weight:\
+  \ 600; font-weight: 600;\">Pytest:</span><span>\_</span><code class=\"\" style=\"\
+  padding: 1.5px 4px; border-radius: 5px; background-color: color(srgb 0.894118 0.894118\
+  \ 0.894118 / 0.0737255); color: color(srgb 0.894118 0.894118 0.894118 / 0.866275);\
+  \ font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 0.9em;\
+  \ line-height: 1.4; word-break: break-all;\">128 passed, 1 skipped</code><span>\_\
+  </span>(~27 min pytest time; ~29 min script wall time)</p><p style=\"--tw-space-y-reverse:\
+  \ 0; margin-block: 0px 16px; margin: 6px 0px; word-break: break-word; color: rgba(228,\
+  \ 228, 228, 0.92); font-family: -apple-system, &quot;system-ui&quot;, sans-serif;\
+  \ font-size: 13px; font-style: normal; font-variant-ligatures: normal; font-variant-caps:\
+  \ normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start;\
+  \ text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:\
+  \ 0px; white-space: normal; background-color: rgb(24, 24, 24); text-decoration-thickness:\
+  \ initial; text-decoration-style: initial; text-decoration-color: initial;\">Includes:<span>\_\
+  </span><code class=\"md-clickable-code md-inline-path-filename-like\" role=\"button\"\
+  \ tabindex=\"0\" style=\"padding: 1.5px 4px; border-radius: 5px; background-color:\
+  \ color(srgb 0.894118 0.894118 0.894118 / 0.0737255); color: rgb(129, 161, 193);\
+  \ font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 0.9em;\
+  \ line-height: 1.4; word-break: break-all; cursor: pointer;\"><span class=\"md-inline-path-filename\"\
+  >test_api_keys.py</span></code>,<span>\_</span><code class=\"md-clickable-code md-inline-path-filename-like\"\
+  \ role=\"button\" tabindex=\"0\" style=\"padding: 1.5px 4px; border-radius: 5px;\
+  \ background-color: color(srgb 0.894118 0.894118 0.894118 / 0.0737255); color: rgb(129,\
+  \ 161, 193); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size:\
+  \ 0.9em; line-height: 1.4; word-break: break-all; cursor: pointer;\"><span class=\"\
+  md-inline-path-filename\">test_namespace_scoping.py</span></code>,<span>\_</span><code\
+  \ class=\"md-clickable-code md-inline-path-filename-like\" role=\"button\" tabindex=\"\
+  0\" style=\"padding: 1.5px 4px; border-radius: 5px; background-color: color(srgb\
+  \ 0.894118 0.894118 0.894118 / 0.0737255); color: rgb(129, 161, 193); font-family:\
+  \ Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 0.9em; line-height:\
+  \ 1.4; word-break: break-all; cursor: pointer;\"><span class=\"md-inline-path-filename\"\
+  >test_negative_security.py</span></code>,<span>\_</span><code class=\"md-clickable-code\
+  \ md-inline-path-filename-like\" role=\"button\" tabindex=\"0\" style=\"padding:\
+  \ 1.5px 4px; border-radius: 5px; background-color: color(srgb 0.894118 0.894118\
+  \ 0.894118 / 0.0737255); color: rgb(129, 161, 193); font-family: Menlo, Monaco,\
+  \ &quot;Courier New&quot;, monospace; font-size: 0.9em; line-height: 1.4; word-break:\
+  \ break-all; cursor: pointer;\"><span class=\"md-inline-path-filename\">test_subscription.py</span></code>,<span>\_\
+  </span><code class=\"md-clickable-code md-inline-path-filename-like\" role=\"button\"\
+  \ tabindex=\"0\" style=\"padding: 1.5px 4px; border-radius: 5px; background-color:\
+  \ color(srgb 0.894118 0.894118 0.894118 / 0.0737255); color: rgb(129, 161, 193);\
+  \ font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size: 0.9em;\
+  \ line-height: 1.4; word-break: break-all; cursor: pointer;\"><span class=\"md-inline-path-filename\"\
+  >test_models_endpoint.py</span></code>,<span>\_</span><code class=\"md-clickable-code\
+  \ md-inline-path-filename-like\" role=\"button\" tabindex=\"0\" style=\"padding:\
+  \ 1.5px 4px; border-radius: 5px; background-color: color(srgb 0.894118 0.894118\
+  \ 0.894118 / 0.0737255); color: rgb(129, 161, 193); font-family: Menlo, Monaco,\
+  \ &quot;Courier New&quot;, monospace; font-size: 0.9em; line-height: 1.4; word-break:\
+  \ break-all; cursor: pointer;\"><span class=\"md-inline-path-filename\">test_external_models.py</span></code>,<span>\_\
+  </span><span class=\"font-semibold\" data-streamdown=\"strong\" style=\"--tw-font-weight:\
+  \ 600; font-weight: 600;\"><code class=\"md-clickable-code md-inline-path-filename-like\"\
+  \ role=\"button\" tabindex=\"0\" style=\"padding: 1.5px 4px; border-radius: 5px;\
+  \ background-color: color(srgb 0.894118 0.894118 0.894118 / 0.0737255); color: rgb(129,\
+  \ 161, 193); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size:\
+  \ 0.9em; line-height: 1.4; word-break: break-all; cursor: pointer;\"><span class=\"\
+  md-inline-path-filename\">test_tenant.py</span></code></span>,<span>\_</span><span\
+  \ class=\"font-semibold\" data-streamdown=\"strong\" style=\"--tw-font-weight: 600;\
+  \ font-weight: 600;\"><code class=\"md-clickable-code md-inline-path-filename-like\"\
+  \ role=\"button\" tabindex=\"0\" style=\"padding: 1.5px 4px; border-radius: 5px;\
+  \ background-color: color(srgb 0.894118 0.894118 0.894118 / 0.0737255); color: rgb(129,\
+  \ 161, 193); font-family: Menlo, Monaco, &quot;Courier New&quot;, monospace; font-size:\
+  \ 0.9em; line-height: 1.4; word-break: break-all; cursor: pointer;\"><span class=\"\
+  md-inline-path-filename\">test_config_tenant.py</span></code></span>.</p><p style=\"\
+  --tw-space-y-reverse: 0; margin-block: 0px 16px; margin: 6px 0px; word-break: break-word;\
+  \ color: rgba(228, 228, 228, 0.92); font-family: -apple-system, &quot;system-ui&quot;,\
+  \ sans-serif; font-size: 13px; font-style: normal; font-variant-ligatures: normal;\
+  \ font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans:\
+  \ 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing:\
+  \ 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(24,\
+  \ 24, 24); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color:\
+  \ initial;\"><span class=\"font-semibold\" data-streamdown=\"strong\" style=\"--tw-font-weight:\
+  \ 600; font-weight: 600;\">Skipped (expected):</span><span>\_</span><code class=\"\
+  md-inline-variable-like\" style=\"padding: 1.5px 4px; border-radius: 5px; background-color:\
+  \ color(srgb 0.894118 0.894118 0.894118 / 0.0737255); color: color(srgb 0.894118\
+  \ 0.894118 0.894118 / 0.866275); font-family: Menlo, Monaco, &quot;Courier New&quot;,\
+  \ monospace; font-size: 0.9em; line-height: 1.4; word-break: break-all;\">test_payload_processing_deployed_with_active_tenant</code><span>\_\
+  </span>\u2014<span>\_</span><code class=\"\" style=\"padding: 1.5px 4px; border-radius:\
+  \ 5px; background-color: color(srgb 0.894118 0.894118 0.894118 / 0.0737255); color:\
+  \ color(srgb 0.894118 0.894118 0.894118 / 0.866275); font-family: Menlo, Monaco,\
+  \ &quot;Courier New&quot;, monospace; font-size: 0.9em; line-height: 1.4; word-break:\
+  \ break-all;\">payload-processing</code><span>\_</span>not asserted when Tenant\
+  \ is not<span>\_</span><code class=\"\" style=\"padding: 1.5px 4px; border-radius:\
+  \ 5px; background-color: color(srgb 0.894118 0.894118 0.894118 / 0.0737255); color:\
+  \ color(srgb 0.894118 0.894118 0.894118 / 0.866275); font-family: Menlo, Monaco,\
+  \ &quot;Courier New&quot;, monospace; font-size: 0.9em; line-height: 1.4; word-break:\
+  \ break-all;\">Active</code><span>\_</span>(optional workload).</p><p style=\"--tw-space-y-reverse:\
+  \ 0; margin-block: 0px 16px; margin: 6px 0px; word-break: break-word; color: rgba(228,\
+  \ 228, 228, 0.92); font-family: -apple-system, &quot;system-ui&quot;, sans-serif;\
+  \ font-size: 13px; font-style: normal; font-variant-ligatures: normal; font-variant-caps:\
+  \ normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start;\
+  \ text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width:\
+  \ 0px; white-space: normal; background-color: rgb(24, 24, 24); text-decoration-thickness:\
+  \ initial; text-decoration-style: initial; text-decoration-color: initial;\"><span\
+  \ class=\"font-semibold\" data-streamdown=\"strong\" style=\"--tw-font-weight: 600;\
+  \ font-weight: 600;\">Post-smoke:</span><span>\_</span><code class=\"md-clickable-code\
+  \ md-inline-path-filename-like\" role=\"button\" tabindex=\"0\" style=\"padding:\
+  \ 1.5px 4px; border-radius: 5px; background-color: color(srgb 0.894118 0.894118\
+  \ 0.894118 / 0.0737255); color: rgb(129, 161, 193); font-family: Menlo, Monaco,\
+  \ &quot;Courier New&quot;, monospace; font-size: 0.9em; line-height: 1.4; word-break:\
+  \ break-all; cursor: pointer;\"><span class=\"md-inline-path-prefix\">./scripts/</span><span\
+  \ class=\"md-inline-path-filename\">validate-deployment.sh</span></code><span>\_\
+  </span>\u2014 critical checks<span>\_</span><span class=\"font-semibold\" data-streamdown=\"\
+  strong\" style=\"--tw-font-weight: 600; font-weight: 600;\">passed</span>.</p>\n\
+  \n\U0001F916 Generated with [Claude Code](https://claude.com/claude-code)\n\n<!--\
+  \ This is an auto-generated comment: release notes by coderabbit.ai -->\n## Summary\
+  \ by CodeRabbit\n\n* **Documentation**\n  * E2E guide reorganized with a concise\
+  \ Quick Start (full deploy, skip deploy, smoke-only), condensed prerequisites, centralized\
+  \ test selection, clarified skip semantics for tenant/config tests, CI smoke expectations,\
+  \ and External OIDC notes.\n\n* **Tests**\n  * New tenant and cluster-config smoke\
+  \ tests validating presence, readiness/phase, ownership anchoring, and status shape;\
+  \ CI smoke run expanded to include tenant, config, and external-model checks.\n\
+  <!-- end of auto-generated comment: release notes by coderabbit.ai -->\n\n## Files\
+  \ involved\n- `test/e2e/README.md`\n- `test/e2e/scripts/prow_run_smoke_test.sh`\n\
+  - `test/e2e/tests/test_config_tenant.py`\n- `test/e2e/tests/test_tenant.py`\n"

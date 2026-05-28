@@ -1,0 +1,13 @@
+prompt: "# fix(test): use HTTPS endpoint for cleanup in e2e API key test\n\n## Summary\n\
+  \n- The `test_trigger_cleanup_preserves_active_keys` e2e test triggers the internal\
+  \ cleanup endpoint by exec'ing into the maas-api pod. The internal server listens\
+  \ on port 8443 with TLS, not plain HTTP on 8080.\n- Updates both curl and wget commands\
+  \ to use `https://localhost:8443` instead of `http://localhost:8080`.\n- Adds `-k`\
+  \ (curl) / `--no-check-certificate` (wget) to skip TLS certificate verification\
+  \ for the self-signed/cluster-internal certificate.\n\n## Test plan\n- [ ] Run `test_trigger_cleanup_preserves_active_keys`\
+  \ e2e test against a cluster with TLS-enabled maas-api\n- [ ] Verify the cleanup\
+  \ endpoint is reachable and returns a valid response\n\n<!-- This is an auto-generated\
+  \ comment: release notes by coderabbit.ai -->\n\n## Summary by CodeRabbit\n\n* **Tests**\n\
+  \  * Updated API key cleanup test to use HTTPS instead of HTTP for improved security\
+  \ in test infrastructure.\n\n<!-- end of auto-generated comment: release notes by\
+  \ coderabbit.ai -->\n\n## Files involved\n- `test/e2e/tests/test_api_keys.py`\n"

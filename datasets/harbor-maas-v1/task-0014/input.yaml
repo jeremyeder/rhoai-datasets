@@ -1,0 +1,71 @@
+prompt: "# feat: add access log middleware with sensitive header redaction\n\n## Summary\n\
+  Implements custom Gin access logger middleware that demonstrates practical usage\
+  \ of the header redaction library from PR #760.\n\nRelated to - https://redhat.atlassian.net/browse/RHOAIENG-61338\n\
+  \n## Changes\n- \u2705 Add `AccessLogger()` middleware in `internal/middleware/access_log.go`\n\
+  - \u2705 Implement `SensitiveHeadersSummaryForAccessLog()` helper in `logger/redaction.go`\n\
+  - \u2705 Replace `gin.Logger()` with `AccessLogger()` in `cmd/main.go`\n- \u2705\
+  \ Simplify request ID validation logic\n- \u2705 Add unit tests for new summary\
+  \ function\n\n## Access Log Format\n```\n[GIN] 2026/05/07 - 14:23:45 | 200 |   12.456ms\
+  \ |   192.168.1.1 | GET     /v1/models | Authorization=present Cookie=absent X-Api-Key=absent\
+  \ Set-Cookie=absent\n```\n\nThe middleware appends a redacted summary showing which\
+  \ sensitive headers were present/absent in the request, without exposing any credential\
+  \ values.\n\n## Testing\n- \u2705 Unit tests pass (`make test`)\n- \u2705 Linting\
+  \ clean (`make lint`) \n- \u2705 Test coverage: 80.7%\n- \u2705 New test: `TestSensitiveHeadersSummaryForAccessLog`\
+  \ verifies format and no credential leakage\n                                  \
+  \                                                                              \
+  \                               \n  \u2705 Live Cluster Test Results           \
+  \                                                                              \
+  \                        \n                                                    \
+  \                                                                              \
+  \             \n```\n  Evidence from logs (before reconciliation):             \
+  \                                                                              \
+  \       \n  [GIN] 2026/05/08 - 20:32:29 | 200 |      75.221\xB5s |      10.131.0.2\
+  \ | GET      \"/health\" | Authorization=absent X-Api-Key=absent\n  Cookie=absent\
+  \ Set-Cookie=absent                                                            \
+  \                                                  \n  [GIN] 2026/05/08 - 20:33:26\
+  \ | 200 |      43.421\xB5s |      10.131.0.2 | GET      \"/health\" | Authorization=absent\
+  \ X-Api-Key=absent             \n  Cookie=absent Set-Cookie=absent     \n```   \
+  \                                                                              \
+  \           \n                                                                 \
+  \                                                                              \n\
+  \  Verification:                                                       \n  \u2705\
+  \ Access log middleware is working                                             \
+  \                                                             \n  \u2705 Sensitive\
+  \ headers summary appended to each request               \n  \u2705 Headers shown\
+  \ as \"absent\" when not present                                               \
+  \                                                 \n  \u2705 NO credential values\
+  \ appear in logs (verified with grep for \"bearer\", \"token\", \"secret\")    \
+  \                                              \n  \u2705 Image deployed successfully:\
+  \ quay.io/rh-ee-sbhatnag/maas-api:access-log-pr871                             \
+  \                                \n                                            \
+  \                                                                              \
+  \                     \n  Format verified:                                     \
+  \                                                                              \
+  \          \n```\n  [Standard Gin log] | [Sensitive headers summary]           \
+  \                                                                              \
+  \    \n                      | Authorization=absent X-Api-Key=absent Cookie=absent\
+  \ Set-Cookie=absent           \n```                                       \n   \
+  \                                                                              \
+  \                                                              \nThe feature is\
+  \ working correctly! The controller reconciled the deployment back to default, which\
+  \ is expected behavior in kustomize mode. The access log middleware successfully:\
+  \                                                                              \
+  \                           \n  1. Appends sensitive header presence indicators\
+  \                     \n  2. Never logs actual credential values               \
+  \                                                                              \
+  \          \n  3. Follows the exact format we designed                         \
+  \    \n\n\n## Dependencies\nRequires PR #760 to be merged first (provides the redaction\
+  \ library).\n\n## Security\n- No credential values logged (only presence/absence\
+  \ indicators)\n- Uses existing `RedactHeader()` function from redaction library\n\
+  - Case-insensitive header matching\n- Request IDs enable correlation without tokens\n\
+  \n\U0001F916 Generated with [Claude Code](https://claude.com/claude-code)\n\n<!--\
+  \ This is an auto-generated comment: release notes by coderabbit.ai -->\n## Summary\
+  \ by CodeRabbit\n\n* **New Features**\n  * Added redaction of sensitive headers\
+  \ in access logs and a compact sensitive-header summary.\n\n* **Refactor**\n  *\
+  \ Reworked server middleware initialization and adjusted middleware ordering, changing\
+  \ request logging behavior.\n\n* **Tests**\n  * Added comprehensive header-redaction\
+  \ tests and updated request-ID tests to validate generated IDs and response headers.\n\
+  <!-- end of auto-generated comment: release notes by coderabbit.ai -->\n\n## Files\
+  \ involved\n- `maas-api/cmd/main.go`\n- `maas-api/internal/logger/redaction.go`\n\
+  - `maas-api/internal/logger/redaction_test.go`\n- `maas-api/internal/middleware/access_log.go`\n\
+  - `maas-api/internal/middleware/request_id_test.go`\n"

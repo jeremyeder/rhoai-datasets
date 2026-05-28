@@ -1,0 +1,14 @@
+prompt: "# chore: update llm-katan simulator endpoint to new AWS instance\n\n## Summary\n\
+  - Migrate llm-katan simulator endpoint from `3-13-21-181.sslip.io` to `3-147-232-199.sslip.io`\
+  \ (new AWS account)\n- Same llm-katan version (0.15.3), same configuration, lifetime\
+  \ stats preserved\n\n## Files changed\n- `test/e2e/scripts/local-deploy.sh` \u2014\
+  \ default `LLM_KATAN_FQDN`\n- `test/e2e/scripts/LOCAL-DEPLOY.md` \u2014 documentation\
+  \ reference\n\n## Test plan\n- [x] New endpoint verified: health, all 5 providers,\
+  \ tool calling, streaming, auth, stats, dashboard\n- [x] TLS cert valid (Let's Encrypt\
+  \ via sslip.io)\n\n<!-- This is an auto-generated comment: release notes by coderabbit.ai\
+  \ -->\n\n## Summary by CodeRabbit\n\n* **Documentation**\n  * Updated external model\
+  \ endpoint configuration in deployment guide.\n\n* **Tests**\n  * Added new authentication\
+  \ enforcement tests for external models to verify proper authorization requirements\
+  \ are applied.\n\n* **Chores**\n  * Updated default endpoint configuration in deployment\
+  \ script.\n\n<!-- end of auto-generated comment: release notes by coderabbit.ai\
+  \ -->\n\n## Files involved\n- `test/e2e/scripts/LOCAL-DEPLOY.md`\n- `test/e2e/scripts/local-deploy.sh`\n"

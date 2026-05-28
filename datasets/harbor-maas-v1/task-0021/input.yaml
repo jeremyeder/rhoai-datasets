@@ -1,0 +1,46 @@
+prompt: "# feat(maas-api): enrich model refs with displayName and description in GET\
+  \ /subscriptions\n\n## Summary\n\nAdd `display_name` and `description` fields to\
+  \ `ModelRefInfo` in `GET /v1/subscriptions`, populated from the `openshift.io/display-name`\
+  \ and `openshift.io/description` annotations on the corresponding `MaaSModelRef`\
+  \ CR.\n\nJira: https://issues.redhat.com/browse/RHOAIENG-62490\n\n## Description\n\
+  \nThe `GET /subscriptions` response previously returned model refs with only `name`,\
+  \ `namespace`, `token_rate_limits`, and `billing_rate`. UI consumers had to make\
+  \ an additional `GET /v1/models` call to resolve human-readable model metadata.\n\
+  \nKey changes:\n- Add `DisplayName` and `Description` (`omitempty`) to `ModelRefInfo`\
+  \ in `types.go`\n- Inject `MaaSModelRefLister` into `Selector`; `buildModelIndex()`\
+  \ builds a single `namespace/name \u2192 unstructured` map once per `loadSubscriptions()`\
+  \ call to avoid repeated `List()` calls per model ref\n- Pass `MaaSModelRefLister`\
+  \ to `NewSelector` in `cmd/main.go` (already available in `ClusterConfig`)\n- Update\
+  \ `openapi3.yaml` `ModelRefInfo` schema with the two new fields\n- Enrichment is\
+  \ read-path only \u2014 no controller changes required; `MaaSModelRef` annotations\
+  \ are already written by the controller\n- Fails gracefully (fields are empty) when\
+  \ the model lister is `nil`, `List()` errors, or the model ref is not yet in the\
+  \ informer cache \u2014 no impact on existing consumers\n\n## How it was tested\n\
+  \n- **Unit tests**: 3 new tests in `handler_test.go` covering the happy path, nil\
+  \ lister (graceful degradation), and model-not-found (graceful degradation). All\
+  \ 16 `maas-api` packages pass.\n- **E2E test**: New `test_model_ref_display_name_and_description_enriched`\
+  \ in `test_subscription_list_endpoints.py` creates a `MaaSModelRef` with annotations\
+  \ on the cluster, creates a subscription pointing to it, calls `GET /v1/subscriptions`,\
+  \ and hard-asserts `display_name` and `description` match the annotations.\n- **Schema\
+  \ validation**: Extended `_validate_subscription_info_schema` to type-check `display_name`\
+  \ and `description` on model refs when present, covering all existing e2e subscription\
+  \ list tests.\n- **Build**: `go build ./...` passes cleanly.\n- Also tested on the\
+  \ clusterbot cluster, here are the before and after test results - \n\nBEFORE \u2014\
+  \ quay.io/opendatahub/maas-api:latest\n```\n\"model_refs\": [\n  {\n    \"name\"\
+  : \"facebook-opt-125m-simulated\",\n    \"namespace\": \"llm\",\n    \"token_rate_limits\"\
+  : [{\"limit\": 100, \"window\": \"1m\"}]\n  }\n]\n```\nAFTER \u2014 quay.io/chkulkar/maas-api:[RHOAIENG-62490](https://redhat.atlassian.net/browse/RHOAIENG-62490)\n\
+  ```\n\"model_refs\": [\n  {\n    \"name\": \"facebook-opt-125m-simulated\",\n  \
+  \  \"namespace\": \"llm\",\n    \"display_name\": \"Facebook OPT 125M (Simulated)\"\
+  ,\n    \"description\": \"A simulated OPT-125M model for free-tier testing\",\n\
+  \    \"token_rate_limits\": [{\"limit\": 100, \"window\": \"1m\"}]\n  }\n]\n```\n\
+  \n<!-- This is an auto-generated comment: release notes by coderabbit.ai -->\n\n\
+  ## Summary by CodeRabbit\n\n* **New Features**\n  * Subscription list endpoints\
+  \ now enrich model references with display names and descriptions sourced from model\
+  \ resource metadata.\n\n* **Documentation**\n  * Updated API specification to document\
+  \ display name and description fields in subscription model reference responses.\n\
+  \n<!-- end of auto-generated comment: release notes by coderabbit.ai -->\n\n## Files\
+  \ involved\n- `.github/workflows/openapi-validation.yml`\n- `maas-api/cmd/main.go`\n\
+  - `maas-api/internal/handlers/models_test.go`\n- `maas-api/internal/subscription/handler_test.go`\n\
+  - `maas-api/internal/subscription/selector.go`\n- `maas-api/internal/subscription/selector_test.go`\n\
+  - `maas-api/internal/subscription/types.go`\n- `maas-api/openapi3.yaml`\n- `test/e2e/fixtures/distinct/maas/maas-model.yaml`\n\
+  - `test/e2e/tests/test_subscription_list_endpoints.py`\n"

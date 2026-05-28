@@ -1,0 +1,33 @@
+# chore: promote main to stable
+
+Automated promotion of **5 commit(s)** from `main` to `stable`.
+
+```
+762cd68 fix: maasmodelref endpoint selection in setups with multiple gateways available (#868)
+ab25d08 fix: route model access probes through gateway's internal service (#828)
+e5b5d47 docs: add PR risk analysis section to AGENTS.md [RHOAIENG-61599] (#885)
+26849a5 feat(RHOAIENG-60867): controller: reconcile governance attachment into MaaSModelRef status (#841)
+831ab31 chore: increase maas-controller terminationGracePeriod to 10 minutes (#886)
+```
+
+
+## Files involved
+- `AGENTS.md`
+- `deployment/base/maas-controller/crd/bases/maas.opendatahub.io_maasauthpolicies.yaml`
+- `deployment/base/maas-controller/crd/bases/maas.opendatahub.io_maasmodelrefs.yaml`
+- `deployment/base/maas-controller/crd/bases/maas.opendatahub.io_maassubscriptions.yaml`
+- `deployment/base/maas-controller/manager/manager.yaml`
+- `maas-api/cmd/main.go`
+- `maas-api/internal/config/cluster_config.go`
+- `maas-api/internal/config/cluster_config_test.go`
+- `maas-api/internal/handlers/models_test.go`
+- `maas-api/internal/models/discovery.go`
+- `maas-controller/.golangci.yml`
+- `maas-controller/api/maas/v1alpha1/common_types.go`
+- `maas-controller/api/maas/v1alpha1/maasmodelref_types.go`
+- `maas-controller/pkg/controller/maas/maasmodelref_controller.go`
+- `maas-controller/pkg/controller/maas/maasmodelref_controller_test.go`
+- `maas-controller/pkg/controller/maas/providers_llmisvc.go`
+- `maas-controller/pkg/controller/maas/providers_llmisvc_test.go`
+- `test/e2e/scripts/prow_run_smoke_test.sh`
+- `test/e2e/tests/test_subscription.py`

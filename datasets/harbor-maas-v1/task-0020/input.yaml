@@ -1,0 +1,51 @@
+prompt: "# chore: add SAR Admin cache\n\nhttps://redhat.atlassian.net/browse/RHOAIENG-54975\n\
+  \n## Description\nThis PR introduces new files:\n- `maas-api/internal/auth/cached_admin_checker.go`\
+  \ \u2014 CachedAdminChecker wrapping SARAdminChecker with TTL-based cache (30s),\
+  \ sync.RWMutex+map for thread safety, lazy eviction of expired entries, and Prometheus\
+  \ counters (`sar_cache_hits_total`, `sar_cache_misses_total`)\n  -  additionally,\
+  \ used `negative TTL` which is the cache duration for \"not admin\" results, as\
+  \ opposed to the regular ttl which applies to \"is admin\" (true) results. This\
+  \ utilizes `asymmetric caching`:\n```\n**true (admin)** - long TTL (30s): Admin\
+  \ status is stable and slow to change. Caching it longer reduces K8s API server\
+  \ load.\n**false (not admin)** - short TTL (2s): A user who was just granted admin\
+  \ RBAC shouldn't have to wait 30s for the cache to expire. A short negative TTL\
+  \ means they get re-checked quickly.\n```\n- `maas-api/internal/auth/cached_admin_checker_test.go`\
+  \ \u2014 15 tests covering cache hits/misses, TTL expiry, group-order invariance,\
+  \ fail-closed guards, metrics, concurrent access, eviction, and constructor panics\n\
+  \nAs well as, I modified files:\n- `maas-api/internal/config/cluster_config.go`\
+  \ \u2014 AdminChecker field changed to *auth.CachedAdminChecker, wraps SARAdminChecker\
+  \ with 30s TTL\n- `maas-api/cmd/main.go` \u2014 added /metrics endpoint via promhttp.Handler()\n\
+  - `maas-api/go.mod / go.sum` \u2014 prometheus/client_golang promoted to direct\
+  \ dependency\n\n## How Has This Been Tested?\nThe existing `E2E test suite` already\
+  \ covers the **admin auth** path end-to-end:\nAdmin authorization tests (`test/e2e/tests/test_api_keys.py`):\n\
+  - test_admin_manage_other_users_keys \u2014 admin can list/filter/revoke other users'\
+  \ keys\n- test_non_admin_cannot_access_other_users_keys \u2014 non-admin gets 404\
+  \ (IDOR protection)\n- test_bulk_revoke_admin_can_revoke_any_user \u2014 admin-only\
+  \ bulk revoke\n\nSAR path exercised via smoke tests (`test/e2e/scripts/prow_run_smoke_test.sh`,\
+  \ `test/e2e/smoke.sh`):\n- Sets up RBAC granting create `maasauthpolicies` permission\n\
+  - Admin token goes through the full path: `user` - `maas-api` - `Kubernetes SubjectAccessReview`\
+  \ - `RBAC check`\n\nThe SAR admin check is already exercised E2E \u2014 requests\
+  \ from the admin user hits `CachedAdminChecker`, which delegates to `SARAdminChecker`,\
+  \ which calls the real Kubernetes API. The cache works as intended as part of the\
+  \ E2E tests since it doesn't change observable behaviuor.\n\nAs for **TTL expiry,\
+  \ eviction, metrics, asymmetric TTL**, those are implementation details best validated\
+  \ by the unit tests that we introdued. Adding `E2E` tests for cache would slow-down\
+  \ the smoke test by a lot for a minimual gain, while units tests serve as a proof\
+  \ the code works. \n\n## Merge criteria:\n<!--- This PR will be merged by any repository\
+  \ approver when it meets all the points in the checklist -->\n<!--- Go over all\
+  \ the following points, and put an `x` in all the boxes that apply. -->\n\n- [x]\
+  \ The commits are squashed in a cohesive manner and have meaningful messages.\n\
+  - [x] Testing instructions have been added in the PR body (for PRs involving changes\
+  \ that are not immediately obvious).\n- [x] The developer has manually tested the\
+  \ changes and verified that the changes work\n\n\n<!-- This is an auto-generated\
+  \ comment: release notes by coderabbit.ai -->\n## Summary by CodeRabbit\n\n* **New\
+  \ Features**\n  * Prometheus metrics endpoint added (GET /metrics) for observing\
+  \ runtime metrics.\n\n* **Performance**\n  * Admin authorization checks now cached\
+  \ with a 30s TTL to reduce repeated lookups.\n\n* **Tests**\n  * Comprehensive tests\
+  \ added covering caching behavior, TTL expiry, concurrency, and metrics counters.\n\
+  <!-- end of auto-generated comment: release notes by coderabbit.ai -->\n\n## Files\
+  \ involved\n- `maas-api/cmd/main.go`\n- `maas-api/go.mod`\n- `maas-api/internal/api_keys/handler.go`\n\
+  - `maas-api/internal/api_keys/handler_test.go`\n- `maas-api/internal/auth/cached_admin_checker.go`\n\
+  - `maas-api/internal/auth/cached_admin_checker_test.go`\n- `maas-api/internal/auth/sar_admin_checker.go`\n\
+  - `maas-api/internal/auth/sar_admin_checker_test.go`\n- `maas-api/internal/config/cluster_config.go`\n\
+  - `maas-api/internal/config/config.go`\n- `maas-api/internal/constant/const.go`\n"

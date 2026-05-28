@@ -1,0 +1,27 @@
+prompt: "# feat: detect rogue or conflicting AuthPolicies on MaaS auth surfaces\n\n\
+  Add conflict detection to the MaaSAuthPolicy reconciler that identifies\nnon-MaaS\
+  \ Kuadrant AuthPolicies targeting the same HTTPRoutes used by\nMaaS-governed models.\
+  \ When conflicts are detected (e.g., KServe\nKserveAuthPolicyReconciler creating\
+  \ *-kserve-route-authn policies on\nthe same route), the controller:\n\n- Sets a\
+  \ ConflictingAuthPolicy condition (True/False) on the\n  MaaSAuthPolicy status,\
+  \ naming the conflicting policies\n- Emits Kubernetes warning events for operator\
+  \ visibility\n- Logs structured warnings with model, HTTPRoute, and policy details\n\
+  \nDetection runs during each reconcile cycle. When conflicting policies\nare removed,\
+  \ the condition automatically transitions back to False.\n\nIncludes 10 unit tests\
+  \ covering: no-conflict baseline, single/multiple\nrogue detection, different-route\
+  \ exclusion, cross-namespace isolation,\nconflict resolution lifecycle, missing\
+  \ model handling, and Gateway\ntarget filtering.\n\nAdds troubleshooting documentation\
+  \ with diagnosis commands and\nremediation steps for KServe anonymous auth policies\
+  \ and custom\nAuthPolicy conflicts.\n\nCloses [RHOAIENG-61515](https://redhat.atlassian.net/browse/RHOAIENG-61515)\n\
+  \nCo-Authored-By: Claude <noreply@anthropic.com>\nSigned-off-by: Jamie Land <jland@redhat.com>\n\
+  \n<!-- This is an auto-generated comment: release notes by coderabbit.ai -->\n##\
+  \ Summary by CodeRabbit\n\n* **New Features**\n  * Detects non-MaaS AuthPolicies\
+  \ that conflict with MaaS-managed HTTPRoutes, surfaces a status condition, and emits\
+  \ warning events when conflicts are found.\n\n* **Documentation**\n  * Added a troubleshooting\
+  \ guide for detecting and resolving conflicting AuthPolicies (symptoms, diagnosis\
+  \ steps, remediation).\n\n* **Tests**\n  * Added comprehensive unit tests covering\
+  \ conflict detection, condition setting, deduplication, and related scenarios.\n\
+  <!-- end of auto-generated comment: release notes by coderabbit.ai -->\n\n## Files\
+  \ involved\n- `deployment/base/maas-controller/rbac/clusterrole.yaml`\n- `docs/content/install/troubleshooting.md`\n\
+  - `maas-controller/pkg/controller/maas/conflict_detection.go`\n- `maas-controller/pkg/controller/maas/conflict_detection_test.go`\n\
+  - `maas-controller/pkg/controller/maas/maasauthpolicy_controller.go`\n"

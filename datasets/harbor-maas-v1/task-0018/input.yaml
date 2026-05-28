@@ -1,0 +1,84 @@
+prompt: "# fix: fixing cleanup issue where not all objects were removed\n\n\n### Description\n\
+  \nThis change introduces a **cluster-scoped `Config`** resource (`maas.opendatahub.io/v1alpha1`,\
+  \ singleton name `default`) as the **anchor for Models-as-a-Service platform lifecycle\
+  \ and garbage collection**. Workloads and related objects applied by the **Tenant**\
+  \ reconciler (server-side apply) receive **`metadata.ownerReferences`** to that\
+  \ `Config` where appropriate, so deleting the anchor drives cleanup of the rendered\
+  \ platform graph instead of relying on legacy Tenant finalizers alone.\n\n**Highlights**\n\
+  \n- **New CRD + default instance**: `Config` CRD and `deployment/base/maas-controller/default/config-default.yaml`\
+  \ for `default`.\n- **Bootstrap** (`cmd/manager`): Ensures `Config/default` exists,\
+  \ then ensures `default-tenant` exists with a **controller** owner reference from\
+  \ `Config` \u2192 `Tenant` on create; patches an **additional owner reference**\
+  \ on existing Tenants when needed (upgrade path). Uses the **API reader** after\
+  \ `Config` create to avoid cache-stale reads.\n- **Tenant reconcile** (`tenant_reconcile.go`):\
+  \ Gates platform work on a live, non-terminating `Config` with UID; surfaces **WaitingForConfigUID**\
+  \ when needed. **Deletion path** deletes the `Config` anchor when present, then\
+  \ strips the legacy finalizer. **Proactive** removal of **`maas.opendatahub.io/tenant-finalizer`**\
+  \ on non-deleting reconciles so upgraded clusters converge without manual patches.\n\
+  - **Platform apply** (`tenantreconcile/apply.go`): `SetControllerReference` from\
+  \ `Config` for rendered objects; **extensible skip list** (`configOwnerRefSkips`)\
+  \ for resources that must not be controller-owned by `Config` (e.g. **`maas-controller`\
+  \ Deployment**, **`maas-parameters` ConfigMap** so it can remain aligned with operator\
+  \ ownership). Handles **`AlreadyOwnedError`** without failing the whole apply.\n\
+  - **Lifecycle reconciler** (`self_deployment_controller.go`): Non-controller **owner\
+  \ reference** from `maas-controller` **Deployment** \u2192 `Config`, strips legacy\
+  \ cleanup finalizer on the Deployment; aligns with moving teardown off the Tenant\
+  \ object.\n- **RBAC**: Split so **`maas-controller-role`** keeps **read-only** `configs`\
+  \ rules; **`maas-controller-cluster-config-role`** (+ binding) holds **mutating**\
+  \ `configs` rules scoped to **`resourceNames: [\"default\"]`** where RBAC allows\
+  \ (separate rule for `create`).\n- **Install / scripts**: `deploy.sh` + `deployment-helpers`\
+  \ apply **CRDs first** and wait for **Established** before applying the full controller\
+  \ bundle (avoids races when not using the ODH operator\u2019s ordering). **`cleanup-odh.sh`**:\
+  \ clear **finalizers** on cluster anchor CRs (`Config`, legacy `ClusterTenant`)\
+  \ before delete.\n- **Container build**: `container.mk` builds with **repo root**\
+  \ context and `-f maas-controller/Dockerfile` so `COPY maas-controller/...` and\
+  \ embedded manifests resolve correctly.\n\n**Coordination with Open Data Hub operator**\n\
+  \nValidated together with **[opendatahub-io/opendatahub-operator#3535](https://github.com/opendatahub-io/opendatahub-operator/pull/3535)**:\n\
+  \n- Operator side moves MaaS disable/cleanup to **`maas-controller` Deployment**\
+  \ lifecycle (instead of deleting the **Tenant** CR), provisions/watches the **cluster-scoped\
+  \ MaaS config** surface, and adds **RBAC for `configs`** so the operator manager\
+  \ can list/watch the new API.\n- MaaS side avoids fighting the operator on **`maas-parameters`**\
+  \ by **not** setting a Config **controller** owner ref on that ConfigMap (skip list),\
+  \ while still applying labels and SSA.\n\nMerge **both** PRs in a coordinated release\
+  \ (or ensure operator RBAC lands before / with the controller build that assumes\
+  \ operator watches `Config`).\n\n### How Has This Been Tested?\n\n- `make -C maas-controller\
+  \ test` (unit tests, including Tenant / lifecycle / apply paths).\n- `go build`\
+  \ for `maas-controller` (including `cmd/manager`).\n- CI: **Konflux / group-test**\
+  \ run referenced on the PR (see bot artifact links on the PR conversation).\n- Manual\
+  \ / cluster (recommended before merge): install controller bundle after CRD wait;\
+  \ confirm `config default` exists; confirm `tenant default-tenant` owner refs; delete\
+  \ `config default` and confirm platform resources garbage-collect; confirm **`maas-parameters`**\
+  \ has no Config **controller** owner ref if the operator still owns it; disable\
+  \ MaaS via operator with **#3535** and confirm **`maas-controller` Deployment**\
+  \ deletion path and cleanup behavior.\n\n### Risk analysis\n\n- **Risk rating**:\
+  \ **4**\n- **Why**: Touches **CRD install order**, **RBAC**, **bootstrap**, **GC\
+  \ semantics**, and **cross-repo operator** behavior. E2E smoke in CI may not cover\
+  \ every disable/cleanup and upgrade permutation; wrong ordering or missing operator\
+  \ RBAC can cause **forbidden** list/watch on `Config` or stuck anchors. Mitigations:\
+  \ two-phase CRD apply in `deploy.sh`, dedicated Config ClusterRole with `resourceNames`,\
+  \ skip list for `maas-parameters`, API reader after create, and explicit operator\
+  \ PR for `configs` RBAC.\n\n\n<!-- This is an auto-generated comment: release notes\
+  \ by coderabbit.ai -->\n## Summary by CodeRabbit\n\n* **New Features**\n  * Added\
+  \ a cluster-scoped Config \"default\" to anchor controller behavior.\n  * Controller\
+  \ startup now waits for CRDs and the Config anchor before proceeding.\n\n* **Documentation**\n\
+  \  * Installation and deployment docs updated with two-phase install guidance and\
+  \ CRD readiness notes.\n\n* **Refactor**\n  * Simplified lifecycle and teardown\
+  \ behavior; removed legacy finalizer-driven cleanup flows.\n  * RBAC rules reorganized\
+  \ to separate config permissions from other controller privileges.\n\n* **Ops**\n\
+  \  * Shortened controller pod termination grace period for faster shutdowns.\n<!--\
+  \ end of auto-generated comment: release notes by coderabbit.ai -->\n\nhttps://github.com/user-attachments/assets/a1388507-56a1-4748-9e59-79d42d59faaa\n\
+  \n\n\n## Files involved\n- `.github/hack/cleanup-odh.sh`\n- `AGENTS.md`\n- `deployment/base/maas-controller/crd/bases/maas.opendatahub.io_configs.yaml`\n\
+  - `deployment/base/maas-controller/crd/kustomization.yaml`\n- `deployment/base/maas-controller/default/config-default.yaml`\n\
+  - `deployment/base/maas-controller/manager/manager.yaml`\n- `deployment/base/maas-controller/rbac/clusterrole.yaml`\n\
+  - `deployment/base/maas-controller/rbac/clusterrole_maas_configs.yaml`\n- `deployment/base/maas-controller/rbac/clusterrolebinding_maas_configs.yaml`\n\
+  - `deployment/base/maas-controller/rbac/kustomization.yaml`\n- `docs/content/install/maas-setup.md`\n\
+  - `docs/content/migration/tier-to-subscription.md`\n- `maas-controller/Makefile`\n\
+  - `maas-controller/README.md`\n- `maas-controller/api/maas/v1alpha1/config_types.go`\n\
+  - `maas-controller/api/maas/v1alpha1/zz_generated.deepcopy.go`\n- `maas-controller/cmd/manager/main.go`\n\
+  - `maas-controller/container.mk`\n- `maas-controller/docs/old-vs-new-flow.md`\n\
+  - `maas-controller/pkg/controller/maas/self_deployment_controller.go`\n- `maas-controller/pkg/controller/maas/self_deployment_controller_test.go`\n\
+  - `maas-controller/pkg/controller/maas/tenant_controller.go`\n- `maas-controller/pkg/controller/maas/tenant_finalize.go`\n\
+  - `maas-controller/pkg/controller/maas/tenant_reconcile.go`\n- `maas-controller/pkg/controller/maas/tenant_reconcile_test.go`\n\
+  - `maas-controller/pkg/platform/tenantreconcile/apply.go`\n- `maas-controller/pkg/platform/tenantreconcile/constants.go`\n\
+  - `maas-controller/pkg/platform/tenantreconcile/pipeline.go`\n- `scripts/deploy.sh`\n\
+  - `scripts/deployment-helpers.sh`\n- `test/e2e/scripts/auth_utils.sh`\n- `test/e2e/scripts/local-deploy.sh`\n"
