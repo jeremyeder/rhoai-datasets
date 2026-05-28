@@ -32,18 +32,18 @@ class DifficultyLevel(StrEnum):
 
 
 class AIDetectionResult(BaseModel):
-    overall_score: float = Field(ge=0.0, le=1.0)
+    overall_score: float = Field(ge=0, le=100)
     per_artifact_scores: dict[str, float] = Field(default_factory=dict)
     method: str = "llm-as-judge"
     model: str = ""
 
 
 class SuitabilityScore(BaseModel):
-    clarity: float = Field(ge=0.0, le=1.0)
-    verifiability: float = Field(ge=0.0, le=1.0)
-    difficulty: float = Field(ge=0.0, le=1.0)
-    domain_relevance: float = Field(ge=0.0, le=1.0)
-    completeness: float = Field(ge=0.0, le=1.0)
+    clarity: float = Field(ge=0, le=100)
+    verifiability: float = Field(ge=0, le=100)
+    difficulty: float = Field(ge=0, le=100)
+    domain_relevance: float = Field(ge=0, le=100)
+    completeness: float = Field(ge=0, le=100)
 
     @property
     def overall(self) -> float:
@@ -70,7 +70,7 @@ class CandidateArtifact(BaseModel):
 
 class DatasetEntry(BaseModel):
     candidate_url: str
-    ai_generation_score: float = Field(ge=0.0, le=1.0)
+    ai_generation_score: float = Field(ge=0, le=100)
     domain_tags: list[str] = Field(default_factory=list)
     difficulty: DifficultyLevel = DifficultyLevel.medium
 

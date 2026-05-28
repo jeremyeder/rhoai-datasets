@@ -82,8 +82,8 @@ def catalog_list(
 @click.option("--limit", default=50, help="Max candidates to return")
 @click.option(
     "--min-score",
-    default=0.4,
-    help="Minimum suitability score",
+    default=40,
+    help="Minimum suitability score (0-100)",
 )
 @click.option(
     "--skip-ai-detection",
@@ -153,10 +153,10 @@ def recommend(
     for c in results:
         ai_flag = ""
         if c.ai_detection:
-            ai_flag = f"  AI: {c.ai_detection.overall_score:.0%}"
+            ai_flag = f"  AI: {c.ai_detection.overall_score:.0f}"
         suitability = c.suitability
         score = suitability.overall if suitability else 0.0
-        click.echo(f"  [{score:.2f}] {c.title[:60]:60s}{ai_flag}")
+        click.echo(f"  [{score:3.0f}] {c.title[:60]:60s}{ai_flag}")
 
     if output:
         data = [c.model_dump(mode="json") for c in results]

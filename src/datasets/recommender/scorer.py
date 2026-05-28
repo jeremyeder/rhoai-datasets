@@ -61,14 +61,14 @@ def _component_spread(files: list[str]) -> int:
 
 def _score_clarity(candidate: CandidateArtifact) -> float:
     desc = candidate.description.lower()
-    score = 0.3
+    score = 30
 
     clarity_signals = [
-        (r"(steps to reproduce|repro|how to)", 0.2),
-        (r"(expected|actual|observed)", 0.15),
-        (r"(problem|issue|bug|error|exception|crash)", 0.1),
-        (r"(fix|solution|resolved|patch)", 0.1),
-        (r"\d+\.", 0.05),
+        (r"(steps to reproduce|repro|how to)", 20),
+        (r"(expected|actual|observed)", 15),
+        (r"(problem|issue|bug|error|exception|crash)", 10),
+        (r"(fix|solution|resolved|patch)", 10),
+        (r"\d+\.", 5),
     ]
     for pattern, weight in clarity_signals:
         if re.search(pattern, desc):
@@ -77,34 +77,34 @@ def _score_clarity(candidate: CandidateArtifact) -> float:
     if len(desc) < 20:
         score *= 0.5
     elif len(desc) > 200:
-        score = min(score + 0.1, 1.0)
+        score = min(score + 10, 100)
 
-    return min(score, 1.0)
+    return min(score, 100)
 
 
 def _score_verifiability(candidate: CandidateArtifact) -> float:
     raw = candidate.raw_data
-    score = 0.3
+    score = 30
 
     resolution = raw.get("resolution", "")
     if resolution in ("Won't Fix", "Duplicate", "Cannot Reproduce"):
-        return 0.1
+        return 10
 
     if "merged" in raw and not raw["merged"]:
-        return 0.0
+        return 0
 
     if raw.get("merged"):
-        score += 0.3
+        score += 30
 
     files = raw.get("files", [])
     if _test_files(files):
-        score += 0.2
+        score += 20
 
     patches = raw.get("patches", {})
     if patches:
-        score += 0.1
+        score += 10
 
-    return min(score, 1.0)
+    return min(score, 100)
 
 
 def _score_difficulty(candidate: CandidateArtifact) -> float:
@@ -115,18 +115,18 @@ def _score_difficulty(candidate: CandidateArtifact) -> float:
     patch_lines = _patch_line_count(patches)
     spread = _component_spread(files)
 
-    score = 0.0
+    score = 0
 
     if patch_lines < 20:
-        score += 0.1
+        score += 10
     elif patch_lines < 100:
-        score += 0.3
+        score += 30
     elif patch_lines < 500:
-        score += 0.7
+        score += 70
     elif patch_lines < 1500:
-        score += 0.9
+        score += 90
     else:
-        score += 0.6
+        score += 60
 
     if src_count <= 1:
         score *= 0.7
@@ -138,26 +138,26 @@ def _score_difficulty(candidate: CandidateArtifact) -> float:
         score *= 0.8
 
     if spread >= 3:
-        score = min(score + 0.1, 1.0)
+        score = min(score + 10, 100)
 
-    return max(0.1, min(score, 1.0))
+    return max(10, min(score, 100))
 
 
 def _score_domain_relevance(candidate: CandidateArtifact) -> float:
-    return 0.5
+    return 50
 
 
 def _score_completeness(candidate: CandidateArtifact) -> float:
-    score = 0.3
+    score = 30
     if candidate.title and len(candidate.title) > 10:
-        score += 0.2
+        score += 20
     if candidate.description and len(candidate.description) > 50:
-        score += 0.2
+        score += 20
     if candidate.raw_data.get("files"):
-        score += 0.15
+        score += 15
     if candidate.raw_data.get("patches"):
-        score += 0.15
-    return min(score, 1.0)
+        score += 15
+    return min(score, 100)
 
 
 def score_candidate(

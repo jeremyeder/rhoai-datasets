@@ -58,7 +58,7 @@ def test_pipeline_filters_by_min_suitability():
     mock_connector.scan.return_value = candidates
 
     pipeline = RecommenderPipeline(connectors=[mock_connector], skip_ai_detection=True)
-    results = pipeline.run(limit=10, min_suitability=0.5)
+    results = pipeline.run(limit=10, min_suitability=50)
 
     assert len(results) <= 2
-    assert all(c.suitability.overall >= 0.5 for c in results)
+    assert all(c.suitability.overall >= 50 for c in results)

@@ -20,9 +20,9 @@ def test_bug_with_clear_context_scores_high():
         },
     )
     score = score_candidate(candidate)
-    assert score.clarity >= 0.7
-    assert score.verifiability >= 0.7
-    assert score.overall >= 0.6
+    assert score.clarity >= 70
+    assert score.verifiability >= 70
+    assert score.overall >= 60
 
 
 def test_vague_feature_request_scores_low():
@@ -35,8 +35,8 @@ def test_vague_feature_request_scores_low():
         raw_data={"issue_type": "Story", "status": "Closed", "resolution": "Won't Fix"},
     )
     score = score_candidate(candidate)
-    assert score.clarity < 0.5
-    assert score.overall < 0.4
+    assert score.clarity < 50
+    assert score.overall < 40
 
 
 def test_wontfix_penalizes_verifiability():
@@ -48,7 +48,7 @@ def test_wontfix_penalizes_verifiability():
         raw_data={"resolution": "Won't Fix"},
     )
     score = score_candidate(candidate)
-    assert score.verifiability < 0.3
+    assert score.verifiability < 30
 
 
 def test_unmerged_pr_scores_zero_verifiability():
@@ -60,7 +60,7 @@ def test_unmerged_pr_scores_zero_verifiability():
         raw_data={"merged": False, "files": [], "patches": {}},
     )
     score = score_candidate(candidate)
-    assert score.verifiability == 0.0
+    assert score.verifiability == 0
 
 
 def test_difficulty_scales_with_patch_size():
