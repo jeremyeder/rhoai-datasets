@@ -12,6 +12,10 @@ from datasets.metadata.schema import CandidateArtifact
 from datasets.patterns import TEST_FILE_RE
 
 _SAFE_FILENAME_RE = re.compile(r"^[A-Za-z0-9_.\-]+$")
+_VALID_SHA_RE = re.compile(r"^[0-9a-f]{7,40}$")
+_VALID_CLONE_URL_RE = re.compile(
+    r"^https://[A-Za-z0-9._\-]+/[A-Za-z0-9._\-/]+(\.git)?$"
+)
 
 
 def _extract_added_lines(patch: str) -> str:
@@ -80,7 +84,8 @@ class HarborTaskFactory:
             else "medium"
         )
         repo_slug = _repo_slug(candidate.raw_data.get("repo_full_name", "unknown"))
-        name = f"rhai-github/{repo_slug}/{task_name}"
+        source = candidate.source_type.value.split("_")[0]
+        name = f"rhai-{source}/{repo_slug}/{task_name}"
         toml = textwrap.dedent(f"""\
             version = "1.0"
             name = "{name}"
@@ -113,8 +118,10 @@ class HarborTaskFactory:
 
         repo_url = candidate.raw_data.get("repo_clone_url", "")
         base_sha = candidate.raw_data.get("base_sha", "")
+        url_valid = bool(repo_url and _VALID_CLONE_URL_RE.fullmatch(repo_url))
+        sha_valid = bool(base_sha and _VALID_SHA_RE.fullmatch(base_sha))
 
-        if repo_url and base_sha:
+        if url_valid and sha_valid:
             dockerfile = textwrap.dedent(f"""\
                 FROM python:3.12-slim
                 ENV DEBIAN_FRONTEND=noninteractive
