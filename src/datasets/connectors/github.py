@@ -2,17 +2,38 @@
 
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
 
 from github import Github
 
 from datasets.metadata.schema import CandidateArtifact, SourceType
 
+_TEST_FILE_RE = re.compile(r"(^|/)tests?[/_]|_test\.|test_", re.IGNORECASE)
+_DOCS_CONFIG_RE = re.compile(
+    r"\.(md|txt|yaml|yml|json|toml|cfg|ini|lock)$"
+    r"|^(README|LICENSE|CHANGELOG|OWNERS|CODEOWNERS|\.)",
+    re.IGNORECASE,
+)
+MAX_SOURCE_FILES = 50
+
 
 def _parse_since(since: str | None) -> datetime | None:
     if not since:
         return None
     return datetime.fromisoformat(since).replace(tzinfo=UTC)
+
+
+def _has_test_files(filenames: list[str]) -> bool:
+    return any(_TEST_FILE_RE.search(f) for f in filenames)
+
+
+def _is_docs_config_only(filenames: list[str]) -> bool:
+    return all(_DOCS_CONFIG_RE.search(f) for f in filenames)
+
+
+def _source_file_count(filenames: list[str]) -> int:
+    return sum(1 for f in filenames if not _TEST_FILE_RE.search(f))
 
 
 class GitHubConnector:
@@ -72,6 +93,14 @@ class GitHubConnector:
                 continue
             file_list = list(pr.get_files())
             files = [f.filename for f in file_list]
+
+            if not _has_test_files(files):
+                continue
+            if _is_docs_config_only(files):
+                continue
+            if _source_file_count(files) > MAX_SOURCE_FILES:
+                continue
+
             patches = {f.filename: (f.patch or "") for f in file_list}
             commit_messages = [c.commit.message for c in pr.get_commits()]
 
