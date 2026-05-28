@@ -168,15 +168,21 @@ def test_harbor_factory_falls_back_to_placeholder_without_test_patches(tmp_path)
 
 
 def test_harbor_factory_solve_sh_contains_real_patches(tmp_path):
+    import base64
+
     factory = HarborTaskFactory()
     candidate = _make_candidate_with_test_patch()
     task_dir = factory.create(candidate, output_dir=tmp_path, task_name="oracle")
 
     solve_sh = (task_dir / "solution" / "solve.sh").read_text()
     assert "patch --fuzz=5 -p1" in solve_sh
-    assert "src/validate.py" in solve_sh
-    assert "def validate(x):" in solve_sh
-    assert "test_validate.py" not in solve_sh
+    assert "base64 -d" in solve_sh
+    # Decode the embedded patch and verify contents
+    b64_match = solve_sh.split("'")[3]
+    decoded = base64.b64decode(b64_match).decode()
+    assert "src/validate.py" in decoded
+    assert "def validate(x):" in decoded
+    assert "test_validate.py" not in decoded
 
 
 def test_harbor_factory_solve_sh_fallback_without_patches(tmp_path):

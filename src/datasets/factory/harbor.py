@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+import base64
 import re
+import shlex
 import textwrap
 from pathlib import Path
 
 from datasets.metadata.schema import CandidateArtifact
 
 _TEST_FILE_RE = re.compile(r"(^|/)tests?[/_]|_test\.|test_", re.IGNORECASE)
+_SAFE_FILENAME_RE = re.compile(r"^[A-Za-z0-9_.\-]+$")
 
 
 def _extract_added_lines(patch: str) -> str:
@@ -111,6 +114,8 @@ class HarborTaskFactory:
         extracted_names: list[str] = []
         for filepath, patch in test_patches.items():
             filename = Path(filepath).name
+            if not _SAFE_FILENAME_RE.fullmatch(filename):
+                continue
             content = _extract_added_lines(patch)
             if content.strip():
                 (tests_dir / filename).write_text(content)
@@ -129,7 +134,7 @@ class HarborTaskFactory:
             )
             extracted_names.append("test_outputs.py")
 
-        test_targets = " ".join(f"/tests/{n}" for n in extracted_names)
+        test_targets = " ".join(shlex.quote(f"/tests/{n}") for n in extracted_names)
         test_sh = textwrap.dedent(f"""\
             #!/bin/bash
             mkdir -p /logs/verifier
@@ -157,13 +162,13 @@ class HarborTaskFactory:
             combined_patch = ""
             for fname, patch in source_patches.items():
                 combined_patch += f"--- a/{fname}\n+++ b/{fname}\n{patch}\n"
+            patch_b64 = base64.b64encode(combined_patch.encode()).decode()
 
             solve_sh = (
                 "#!/bin/bash\n"
                 "set -e\n"
-                "cat > /tmp/solution.patch << '__SOLUTION_PATCH__'\n"
-                f"{combined_patch}"
-                "__SOLUTION_PATCH__\n"
+                f"printf '%s' '{patch_b64}'"
+                " | base64 -d > /tmp/solution.patch\n"
                 "cd /testbed\n"
                 "patch --fuzz=5 -p1 -i /tmp/solution.patch\n"
             )
