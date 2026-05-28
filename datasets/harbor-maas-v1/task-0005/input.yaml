@@ -1,0 +1,41 @@
+prompt: "# feat(metrics): add Prometheus metrics instrumentation to maas-api\n\nAdd\
+  \ basic HTTP request metrics instrumentation (count, latency, in-flight) to the\
+  \ maas-api server to comply with ODH-ADR-Operator-0010 observability requirements.\n\
+  \nRef: [RHOAIENG-56049](https://redhat.atlassian.net/browse/RHOAIENG-56049)\n\n\
+  ## Description\n- MetricsRecorder interface decouples middleware from Prometheus,\
+  \ enabling future OTel migration\n- Gin middleware records `maas_api_http_requests_total`\
+  \ (counter), `maas_api_http_request_duration_seconds` (histogram), and `maas_api_http_requests_in_flight`\
+  \ (gauge) with method/route/status labels\n- Used Prometheus naming style\n- Standalone\
+  \ metrics server on configurable port (`METRICS_PORT`, default 9090) serves `/metrics`\
+  \ endpoint separate from the gateway\n- `PodMonitor` and `NetworkPolicy` for RHOAI\
+  \ monitoring stack scraping\n\n## How Has This Been Tested?\n\n- [x] Deployed to\
+  \ a fresh OCP 4.20 cluster using kustomize mode with a custom maas-api image built\
+  \ from this branch. Verified that `/metrics` endpoint works by port-forwarding to\
+  \ port 9090 and curling it.\n- [x] Confirmed that the PodMonitor and NetworkPolicy\
+  \ are deployed in the namespace with the right labels (monitoring.opendatahub.io/scrape:\
+  \ \"true\"). The kustomize build picks them up through the default overlay without\
+  \ issues.\n\n## Merge criteria:\n<!--- This PR will be merged by any repository\
+  \ approver when it meets all the points in the checklist -->\n<!--- Go over all\
+  \ the following points, and put an `x` in all the boxes that apply. -->\n\n- [x]\
+  \ The commits are squashed in a cohesive manner and have meaningful messages.\n\
+  - [x] Testing instructions have been added in the PR body (for PRs involving changes\
+  \ that are not immediately obvious).\n- [x] The developer has manually tested the\
+  \ changes and verified that the changes work\n\n\n<!-- This is an auto-generated\
+  \ comment: release notes by coderabbit.ai -->\n## Summary by CodeRabbit\n\n* **New\
+  \ Features**\n  * Exposes a Prometheus-compatible metrics endpoint on port 9090\
+  \ (configurable via METRICS_PORT) and runs a dedicated metrics server\n  * Adds\
+  \ HTTP request metrics (count, latency, in-flight) per method, route, and status;\
+  \ middleware records requests\n\n* **Infrastructure**\n  * Kubernetes manifests\
+  \ updated to expose the metrics port, include monitoring resources, and restrict\
+  \ network access to metrics\n\n* **Tests**\n  * Added unit and integration tests\
+  \ validating metrics collection and scraping\n<!-- end of auto-generated comment:\
+  \ release notes by coderabbit.ai -->\n\n## Files involved\n- `deployment/base/maas-api/core/deployment.yaml`\n\
+  - `deployment/base/maas-api/core/service.yaml`\n- `deployment/base/maas-api/default/kustomization.yaml`\n\
+  - `deployment/base/maas-api/monitoring/kustomization.yaml`\n- `deployment/base/maas-api/monitoring/networkpolicy.yaml`\n\
+  - `deployment/base/maas-api/monitoring/podmonitor.yaml`\n- `maas-api/cmd/main.go`\n\
+  - `maas-api/internal/config/cluster_config.go`\n- `maas-api/internal/config/config.go`\n\
+  - `maas-api/internal/config/config_test.go`\n- `maas-api/internal/constant/const.go`\n\
+  - `maas-api/internal/metrics/middleware.go`\n- `maas-api/internal/metrics/prometheus.go`\n\
+  - `maas-api/internal/metrics/prometheus_test.go`\n- `maas-api/internal/metrics/recorder.go`\n\
+  - `maas-api/internal/metrics/recorder_test.go`\n- `maas-api/internal/metrics/server.go`\n\
+  - `maas-api/internal/metrics/server_test.go`\n"

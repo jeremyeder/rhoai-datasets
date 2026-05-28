@@ -1,0 +1,43 @@
+prompt: "# feat: mask Authorization header in logs\n\n## Summary\n\nRemoves Authorization\
+  \ header length logging and adds presence indicators to prevent credential leakage\
+  \ and side-channel attacks in observability data.\n\n## Changes\n\n- **Remove header\
+  \ length logging**: Changed `authHeaderLen` to `authHeaderProvided` in discovery.go\n\
+  - **Add redaction helpers**: New `logger/redaction.go` with helpers for sensitive\
+  \ headers\n- **Add request ID middleware**: Enable correlation without exposing\
+  \ tokens\n- **Update documentation**: Security guidance in observability.md\n\n\
+  ## Security Improvements\n\n\u2705 Authorization header values never logged in full\
+  \  \n\u2705 Header lengths not logged (prevents side-channel analysis)  \n\u2705\
+  \ Request IDs enable correlation without tokens  \n\u2705 SAFE comments document\
+  \ intentional header mentions  \n\n## Live Cluster Testing\n\n**Test Environment:**\
+  \ OpenShift CI cluster with MaaS deployed\n\n**Verification Results:**\n```bash\n\
+  # Built and deployed custom image\nImage: quay.io/rh-ee-sbhatnag/maas-api:redaction-test\n\
+  \n# Made authenticated requests with test tokens\ncurl -H \"Authorization: Bearer\
+  \ test-secret-token-12345\" https://<gateway>/v1/models\n\n# Searched logs for token\
+  \ leakage\nkubectl logs -n opendatahub deployment/maas-api --tail=200 | grep \"\
+  test-secret-token\"\n# Result: NO MATCHES \u2705\n\n# Verified old code removed\n\
+  kubectl logs -n opendatahub deployment/maas-api | grep -c \"authHeaderLen\"\n# Result:\
+  \ 0 occurrences \u2705\n\n# Confirmed new code executing\nkubectl logs -n opendatahub\
+  \ deployment/maas-api | grep \"authHeaderProvided\"\n# Result: New logging patterns\
+  \ found \u2705\n```\n\n**Test Results:**\n- \u2705 Authorization tokens NOT found\
+  \ in logs\n- \u2705 Old dangerous code (`authHeaderLen`) removed\n- \u2705 New code\
+  \ deployed and executing\n- \u2705 All unit tests pass\n\n## Files Changed\n\n```\n\
+  5 files modified, 3 new files (53 insertions, 2 deletions)\n\nModified:\n- docs/content/advanced-administration/observability.md\n\
+  - maas-api/cmd/main.go\n- maas-api/internal/handlers/models.go  \n- maas-api/internal/logger/logger.go\n\
+  - maas-api/internal/models/discovery.go\n\nNew:\n- maas-api/internal/logger/redaction.go\n\
+  - maas-api/internal/logger/redaction_test.go\n- maas-api/internal/middleware/request_id.go\n\
+  ```\n\nRelated to - https://redhat.atlassian.net/browse/RHOAIENG-55485\n\n<!-- This\
+  \ is an auto-generated comment: release notes by coderabbit.ai -->\n## Summary by\
+  \ CodeRabbit\n\n* **New Features**\n  * Request-ID middleware validates/propagates\
+  \ a consistent X-Request-ID for logs and responses.\n\n* **Security / Logging**\n\
+  \  * Sensitive headers (Authorization, API keys, cookies) are never logged in full;\
+  \ logs show presence indicators or deterministic tokens.\n  * Access logging disabled\
+  \ by default; if enabled, must redact sensitive headers. Tracing excludes Authorization\
+  \ headers.\n\n* **Bug Fixes**\n  * Missing-authorization now logs at Debug instead\
+  \ of Error.\n\n* **Tests**\n  * Added tests covering header redaction and request-id\
+  \ middleware.\n\n* **Documentation**\n  * New \"Sensitive Header Redaction\" docs\
+  \ and concrete debugging steps for auth failures.\n<!-- end of auto-generated comment:\
+  \ release notes by coderabbit.ai -->\n\n## Files involved\n- `docs/content/advanced-administration/observability.md`\n\
+  - `maas-api/cmd/main.go`\n- `maas-api/internal/handlers/models.go`\n- `maas-api/internal/logger/logger.go`\n\
+  - `maas-api/internal/logger/redaction.go`\n- `maas-api/internal/logger/redaction_test.go`\n\
+  - `maas-api/internal/middleware/request_id.go`\n- `maas-api/internal/middleware/request_id_test.go`\n\
+  - `maas-api/internal/models/discovery.go`\n"

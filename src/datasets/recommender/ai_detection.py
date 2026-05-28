@@ -32,19 +32,21 @@ Text to analyze:
 
 
 def parse_judge_response(response: str) -> float:
+    """Parse LLM judge response and return score on 0-100 scale."""
     try:
         data = json.loads(response)
         score = float(data["score"])
-        return max(0.0, min(1.0, score))
+        score = max(0.0, min(1.0, score))
+        return score * 100
     except (json.JSONDecodeError, KeyError, TypeError, ValueError):
         if any(
             word in response.lower()
             for word in ["ai generated", "ai-generated", "likely ai"]
         ):
-            return 0.7
+            return 70
         if any(word in response.lower() for word in ["human", "natural", "organic"]):
-            return 0.3
-        return 0.5
+            return 30
+        return 50
 
 
 def _call_judge(text: str, model: str) -> str:
@@ -93,7 +95,7 @@ def detect_ai_content(
         overall = 0.0
 
     return AIDetectionResult(
-        overall_score=round(overall, 3),
+        overall_score=round(overall, 1),
         per_artifact_scores=per_artifact,
         method="llm-as-judge",
         model=model,

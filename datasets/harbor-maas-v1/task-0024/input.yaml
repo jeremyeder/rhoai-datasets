@@ -1,0 +1,29 @@
+prompt: "# chore: promote stable to rhoai\n\n## Promotion: stable \u2192 rhoai\n\n\
+  Automated promotion of **5 commit(s)** from `stable` to `rhoai`.\n\n| Detail | Value\
+  \ |\n| --- | --- |\n| Promotion | `stable` \u2192 `rhoai` |\n| Commits to merge\
+  \ | **5** |\n| Conflict check | \u2705 Passed |\n\n### Commits included\n\n````\n\
+  a24c8c8 feat: add standalone setup-gateway.sh script for maas-default-gateway (#941)\n\
+  bb18f4a fix: restore --dev flag in deploy script argument parser (#939)\n0ee18b6\
+  \ refactor: move Tenant reconciler away from params.env and maas-parameters (#864)\n\
+  85d3311 feat: add access log middleware with sensitive header redaction (#871)\n\
+  ````\n\n---\n\u26A0\uFE0F **Merge this PR with a merge commit** (do not squash or\
+  \ rebase).\n\n\n## Files involved\n- `.github/hack/cleanup-odh.sh`\n- `.github/scripts/update-kustomize-tag.sh`\n\
+  - `.github/workflows/create-release.yml`\n- `AGENTS.md`\n- `README.md`\n- `deployment/base/maas-api/policies/auth-policy.yaml`\n\
+  - `deployment/base/maas-controller/default/params.env`\n- `deployment/base/maas-controller/manager/manager.yaml`\n\
+  - `deployment/components/shared-patches/kustomization.yaml`\n- `deployment/overlays/dev/params.env`\n\
+  - `docs/content/configuration-and-management/authorino-caching.md`\n- `docs/content/configuration-and-management/gateway-patterns.md`\n\
+  - `docs/content/configuration-and-management/tls-configuration.md`\n- `docs/content/contributing/release-strategy.md`\n\
+  - `docs/content/contributing/testing-guide.md`\n- `docs/content/install/maas-setup.md`\n\
+  - `docs/samples/gateway-patterns/clusterip-route-reencrypt/openshift-route.yaml`\n\
+  - `maas-api/cmd/main.go`\n- `maas-api/deploy/overlays/dev/kustomization.yaml`\n\
+  - `maas-api/deploy/overlays/dev/params.env`\n- `maas-api/deploy/overlays/odh/kustomization.yaml`\n\
+  - `maas-api/deploy/overlays/odh/params.env`\n- `maas-api/internal/logger/redaction.go`\n\
+  - `maas-api/internal/logger/redaction_test.go`\n- `maas-api/internal/middleware/access_log.go`\n\
+  - `maas-api/internal/middleware/request_id_test.go`\n- `maas-controller/README.md`\n\
+  - `maas-controller/cmd/manager/main.go`\n- `maas-controller/pkg/controller/maas/tenant_controller.go`\n\
+  - `maas-controller/pkg/controller/maas/tenant_reconcile.go`\n- `maas-controller/pkg/platform/tenantreconcile/apply.go`\n\
+  - `maas-controller/pkg/platform/tenantreconcile/constants.go`\n- `maas-controller/pkg/platform/tenantreconcile/params.go`\n\
+  - `maas-controller/pkg/platform/tenantreconcile/params_test.go`\n- `maas-controller/pkg/platform/tenantreconcile/pipeline.go`\n\
+  - `maas-controller/pkg/platform/tenantreconcile/postrender.go`\n- `maas-controller/pkg/platform/tenantreconcile/prerequisites.go`\n\
+  - `scripts/README.md`\n- `scripts/deploy.sh`\n- `scripts/deployment-helpers.sh`\n\
+  - `scripts/setup-gateway.sh`\n- `test/e2e/scripts/local-deploy.sh`\n"

@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 from datasets.connectors.base import SourceConnector
-from datasets.metadata.schema import CandidateArtifact, EvalType, SourceType
+from datasets.metadata.schema import (
+    CandidateArtifact,
+    DifficultyLevel,
+    EvalType,
+    SourceType,
+)
 from datasets.recommender.scorer import score_candidate
 
 EVAL_TYPE_HEURISTICS: dict[SourceType, EvalType] = {
@@ -15,6 +20,14 @@ EVAL_TYPE_HEURISTICS: dict[SourceType, EvalType] = {
     SourceType.compliance: EvalType.safety,
     SourceType.confluence_page: EvalType.model_quality,
 }
+
+
+def _bucket_difficulty(score: float) -> DifficultyLevel:
+    if score < 35:
+        return DifficultyLevel.easy
+    if score < 65:
+        return DifficultyLevel.medium
+    return DifficultyLevel.hard
 
 
 class RecommenderPipeline:
@@ -45,6 +58,9 @@ class RecommenderPipeline:
 
         for candidate in all_candidates:
             candidate.suitability = score_candidate(candidate)
+            candidate.difficulty_bucket = _bucket_difficulty(
+                candidate.suitability.difficulty
+            )
             candidate.suggested_eval_type = EVAL_TYPE_HEURISTICS.get(
                 candidate.source_type, EvalType.agent_coding
             )

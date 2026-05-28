@@ -1,0 +1,16 @@
+prompt: "# fix: scale down kserve-controller-manager to prevent crash-loop on Kind\n\
+  \n## Summary\n- The opendatahub fork `kserve-controller` image watches `Route.route.openshift.io`\
+  \ for `InferenceGraph`, which crash-loops on non-OpenShift clusters (Kind) even\
+  \ with stub CRDs installed.\n- Scale `kserve-controller-manager` to 0 replicas instead\
+  \ of swapping its image to the ODH fork. The vanilla KServe install still provides\
+  \ CRDs, RBAC, and webhook configs.\n- `LLMInferenceService` reconciliation is handled\
+  \ by the separate `llmisvc-controller-manager`, which runs fine on Kind.\n\n## Test\
+  \ plan\n- [ ] Run `local-deploy.sh` on a fresh Kind cluster and verify no pods are\
+  \ in CrashLoopBackOff\n- [ ] Verify `llmisvc-controller-manager` is 1/1 Ready and\
+  \ handles LLMInferenceService resources\n- [ ] Verify smoke test passes end-to-end\n\
+  \n<!-- This is an auto-generated comment: release notes by coderabbit.ai -->\n\n\
+  ## Summary by CodeRabbit\n\n* **Chores**\n  * Updated test deployment script to\
+  \ simplify KServe controller initialization. The deployment process no longer uses\
+  \ a custom controller image and instead delegates inference service handling to\
+  \ a separate manager component.\n\n<!-- end of auto-generated comment: release notes\
+  \ by coderabbit.ai -->\n\n## Files involved\n- `test/e2e/scripts/local-deploy.sh`\n"

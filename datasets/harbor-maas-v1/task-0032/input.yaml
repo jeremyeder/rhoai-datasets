@@ -1,0 +1,13 @@
+prompt: "# fix(e2e): avoid creating service accounts in default namespace\n\n## Summary\n\
+  Some clusters (eg. ROSA) restrict deletion of service accounts in the `default`\
+  \ namespace, causing test cleanup failures.\n\n- Replace `namespace=\"default\"\
+  ` with `namespace=MODEL_NAMESPACE` for all e2e test service account operations (`_create_sa_token`,\
+  \ `_sa_to_user`, `_delete_sa`)\n- Replace hardcoded `f\"system:serviceaccount:default:{sa_name}\"\
+  ` strings with `_sa_to_user(sa_name, namespace=MODEL_NAMESPACE)` for consistency\n\
+  \n<!-- This is an auto-generated comment: release notes by coderabbit.ai -->\n\n\
+  ## Summary by CodeRabbit\n\n* **Tests**\n  * Updated end-to-end tests to use model-scoped\
+  \ namespace configuration for service account operations, improving test environment\
+  \ consistency and cleanup procedures.\n\n**Note:** This release contains no user-facing\
+  \ changes. Updates are internal to testing infrastructure.\n\n<!-- end of auto-generated\
+  \ comment: release notes by coderabbit.ai -->\n\n## Files involved\n- `test/e2e/tests/test_api_keys.py`\n\
+  - `test/e2e/tests/test_subscription.py`\n"

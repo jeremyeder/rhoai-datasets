@@ -1,0 +1,30 @@
+prompt: "# chore: add isManaged check for all resources managed by maas-controller\n\
+  \n## Description\n\nAudits all resource types reconciled by `maas-controller` to\
+  \ confirm the `opendatahub.io/managed=false` opt-out annotation is respected on\
+  \ both the write (create/update) and delete paths.\n\n## How Has This Been Tested?\n\
+  \nNew unit tests in `pkg/reconciler/externalmodel/reconciler_test.go` cover the\
+  \ added behaviour:\n\n- `TestManagedAnnotation_Service` \u2014 write-path opt-out:\
+  \ pre-existing Service with `managed=false` keeps its sentinel `ExternalName` after\
+  \ reconcile.\n- `TestManagedAnnotation_ServiceEntry` \u2014 write-path opt-out:\
+  \ pre-existing ServiceEntry spec is untouched.\n- `TestManagedAnnotation_HTTPRoute`\
+  \ \u2014 write-path opt-out: pre-existing HTTPRoute parent ref is untouched.\n-\
+  \ `TestManagedAnnotation_DestinationRule_DeletePath` \u2014 delete-path opt-out:\
+  \ stale DestinationRule with `managed=false` survives the TLS\u2192no-TLS transition\
+  \ that would otherwise call `deleteIfExists`.\n- `TestIsManaged` \u2014 unit-tests\
+  \ the helper across all edge cases (nil annotations, absent key, `false`, `true`,\
+  \ other values, case-sensitivity).\n\nEach test includes the three-way table `absent\
+  \ / managed=false / managed=true` to confirm the positive and negative cases.\n\
+  https://redhat.atlassian.net/browse/RHOAIENG-60911\n\n## Merge criteria:\n- [x]\
+  \ The commits are squashed in a cohesive manner and have meaningful messages.\n\
+  - [ ] Testing instructions have been added in the PR body (for PRs involving changes\
+  \ that are not immediately obvious).\n- [x] The developer has manually tested the\
+  \ changes and verified that the changes work\n\n<!-- This is an auto-generated comment:\
+  \ release notes by coderabbit.ai -->\n\n## Summary by CodeRabbit\n\n## Release Notes\n\
+  \n* **New Features**\n  * Resources can now opt-out of automatic management by setting\
+  \ the `opendatahub.io/managed=false` annotation. When applied, the controller will\
+  \ skip updates and deletions for annotated resources.\n\n* **Tests**\n  * Added\
+  \ comprehensive test coverage for opt-out annotation behavior across service management,\
+  \ gateway routing, and resource lifecycle operations.\n\n<!-- end of auto-generated\
+  \ comment: release notes by coderabbit.ai -->\n\n## Files involved\n- `maas-controller/pkg/controller/maas/annotations.go`\n\
+  - `maas-controller/pkg/platform/tenantreconcile/constants.go`\n- `maas-controller/pkg/platform/tenantreconcile/postrender.go`\n\
+  - `maas-controller/pkg/reconciler/externalmodel/reconciler.go`\n- `maas-controller/pkg/reconciler/externalmodel/reconciler_test.go`\n"

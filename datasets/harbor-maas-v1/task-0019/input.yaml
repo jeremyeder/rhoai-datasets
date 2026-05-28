@@ -1,0 +1,36 @@
+prompt: "# feat(maas-api): enable TLS certificate validation for internal gateway\
+  \ calls\n\n<!--- Provide a general summary of your changes in the Title above -->\n\
+  \n## Description\nThis PR fixes the TLS certificate validation issue in the maas-api\
+  \ service where InsecureSkipVerify: true was used for internal gateway calls, bypassing\
+  \ FIPS-certified certificate validation.\n\n**Issue:** The HTTP client used for\
+  \ model discovery/access validation (probing model endpoints to check user access)\
+  \ had TLS certificate verification disabled. This was flagged as [FIPS-001](https://redhat.atlassian.net/browse/FIPS-001)\
+  \ violation during security scanning.\n\n**Before:**\n```\nTLSClientConfig: &tls.Config{InsecureSkipVerify:\
+  \ true}, //nolint:gosec // cluster-internal only\n```\n**After:**\n```\nTLSClientConfig:\
+  \ tlsConfig, // Uses K8s service account CA or system root CAs\n```\n\nhttps://redhat.atlassian.net/browse/RHOAIENG-47769\n\
+  \n## How Has This Been Tested?\n* Unit Tests \n* Manual Cluster Testing:\n  * Built\
+  \ and pushed test image: quay.io/isequeir/maas-api:tls-fix-amd64\n  * Deployed to\
+  \ OpenShift cluster in opendatahub namespace\n  * Verified pod starts successfully\
+  \ with debug logging enabled\n  * Made authenticated requests to /v1/models endpoint\n\
+  \  * Verified HTTPS connections to model endpoints complete successfully (received\
+  \ HTTP 403 auth response, not TLS errors)\n\n  * Confirmed TLS CA loading via log\
+  \ message:\n```\n  Using Kubernetes service account CA for TLS validation {\"path\"\
+  : \"/var/run/secrets/kubernetes.io/serviceaccount/ca.crt\"}\n```\n<!--- Please describe\
+  \ in detail how you tested your changes. -->\n<!--- Include details of your testing\
+  \ environment, and the tests you ran to -->\n<!--- see how your change affects other\
+  \ areas of the code, etc. -->\n\n## Merge criteria:\n<!--- This PR will be merged\
+  \ by any repository approver when it meets all the points in the checklist -->\n\
+  <!--- Go over all the following points, and put an `x` in all the boxes that apply.\
+  \ -->\n\n- [x] The commits are squashed in a cohesive manner and have meaningful\
+  \ messages.\n- [x] Testing instructions have been added in the PR body (for PRs\
+  \ involving changes that are not immediately obvious).\n- [x] The developer has\
+  \ manually tested the changes and verified that the changes work\n\n\n<!-- This\
+  \ is an auto-generated comment: release notes by coderabbit.ai -->\n## Summary by\
+  \ CodeRabbit\n\n* **Bug Fixes**\n  * Enforced secure TLS for cluster probes: removed\
+  \ insecure defaults, require TLS 1.2+, prefer the in-cluster service account CA\
+  \ when available, fall back to system roots, and fail initialization if a present\
+  \ cluster CA cannot be parsed. Added debug logging indicating which CA pool was\
+  \ used.\n\n* **Tests**\n  * Added tests covering manager initialization and TLS\
+  \ configuration behaviors.\n<!-- end of auto-generated comment: release notes by\
+  \ coderabbit.ai -->\n\n## Files involved\n- `maas-api/internal/models/discovery.go`\n\
+  - `maas-api/internal/models/discovery_test.go`\n"

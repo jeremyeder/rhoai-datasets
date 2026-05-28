@@ -1,0 +1,6 @@
+#!/bin/bash
+mkdir -p /logs/verifier
+uvx --with pytest==8.4.1 --with pytest-json-ctrf==0.3.5 \
+  pytest --ctrf /logs/verifier/ctrf.json /tests/cluster_config_test.go /tests/models_test.go /tests/maasmodelref_controller_test.go /tests/providers_llmisvc_test.go /tests/prow_run_smoke_test.sh /tests/test_subscription.py -rA -v
+if [ $? -eq 0 ]; then echo 1 > /logs/verifier/reward.txt; else echo 0 > /logs/verifier/reward.txt; fi
+exit 0

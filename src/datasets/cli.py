@@ -82,8 +82,8 @@ def catalog_list(
 @click.option("--limit", default=50, help="Max candidates to return")
 @click.option(
     "--min-score",
-    default=0.4,
-    help="Minimum suitability score",
+    default=40,
+    help="Minimum suitability score (0-100)",
 )
 @click.option(
     "--skip-ai-detection",
@@ -150,13 +150,23 @@ def recommend(
     results = pipeline.run(limit=limit, min_suitability=min_score, **extra_kwargs)
 
     click.echo(f"Found {len(results)} candidates (min score: {min_score})")
+    bucket_counts: dict[str, int] = {"easy": 0, "medium": 0, "hard": 0}
     for c in results:
         ai_flag = ""
         if c.ai_detection:
-            ai_flag = f"  AI: {c.ai_detection.overall_score:.0%}"
+            ai_flag = f"  AI: {c.ai_detection.overall_score:.0f}"
         suitability = c.suitability
         score = suitability.overall if suitability else 0.0
-        click.echo(f"  [{score:.2f}] {c.title[:60]:60s}{ai_flag}")
+        bucket = f"  [{c.difficulty_bucket.value}]" if c.difficulty_bucket else ""
+        click.echo(f"  [{score:3.0f}] {c.title[:55]:55s}{bucket}{ai_flag}")
+        if c.difficulty_bucket:
+            bucket_counts[c.difficulty_bucket.value] += 1
+    click.echo(
+        f"\nDifficulty: "
+        f"easy={bucket_counts['easy']}  "
+        f"medium={bucket_counts['medium']}  "
+        f"hard={bucket_counts['hard']}"
+    )
 
     if output:
         data = [c.model_dump(mode="json") for c in results]
@@ -217,5 +227,10 @@ def create_dataset(input_file: Path, fmt: str, output_dir: Path) -> None:
         task_name = f"task-{i:04d}"
         result = factory.create(candidate, output_dir=output_dir, task_name=task_name)
         click.echo(f"  Created: {result}")
+
+    if fmt == "harbor":
+        dataset_name = output_dir.name
+        factory.create_dataset_toml(output_dir, dataset_name)
+        click.echo(f"  Created: {output_dir / 'dataset.toml'}")
 
     click.echo(f"Created {len(candidates)} {fmt} tasks in {output_dir}")

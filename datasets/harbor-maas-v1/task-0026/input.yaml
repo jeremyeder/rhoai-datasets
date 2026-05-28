@@ -1,0 +1,46 @@
+prompt: "# refactor: move Tenant reconciler away from params.env and maas-parameters\n\
+  \n<!--- Provide a general summary of your changes in the Title above -->\nhttps://redhat.atlassian.net/browse/RHOAIENG-59864\n\
+  \n## Description\n<!--- Describe your changes in detail -->\n**Major**\n\nThis PR\
+  \ consolidates the ownership of `params.env` and ConfigMap `maas-parameters`. After\
+  \ the change, only ODH reads from `params.env` and writes to `maas-parameters`,\
+  \ MaaS doesn't any more. Instead, Tenant reconciler gathers required params from\
+  \ MaaS controller args/env vars, Tenant CR and auto-detection, and patches them\
+  \ to the manifests with code instead of kustomize.\n\n**Minor**\n\nThis PR also\
+  \ includes some other chores:\n- starts to move `params.env` from outdated `/overlays/odh`\
+  \ to `base/maas-controller/default`, and includes only the necessary params there\
+  \ (the image ones).\n- cleans up useless `shared-patches` and MaaS-side `params.env`.\n\
+  - updates a whole bunch of stale or dead docs, scripts and comments.\n\n## How Has\
+  \ This Been Tested?\n<!--- Please describe in detail how you tested your changes.\
+  \ -->\n<!--- Include details of your testing environment, and the tests you ran\
+  \ to -->\n<!--- see how your change affects other areas of the code, etc. -->\n\
+  Deployed on a cluster and verified all resources work as before and pass all E2E\
+  \ tests.\n\n## Merge criteria:\n<!--- This PR will be merged by any repository approver\
+  \ when it meets all the points in the checklist -->\n<!--- Go over all the following\
+  \ points, and put an `x` in all the boxes that apply. -->\n\n- [x] The commits are\
+  \ squashed in a cohesive manner and have meaningful messages.\n- [x] Testing instructions\
+  \ have been added in the PR body (for PRs involving changes that are not immediately\
+  \ obvious).\n- [x] The developer has manually tested the changes and verified that\
+  \ the changes work\n\n<!-- This is an auto-generated comment: release notes by coderabbit.ai\
+  \ -->\n## Summary by CodeRabbit\n\n* **Chores**\n  * Platform values (images, gateway,\
+  \ namespace, audience, API key expiry) are now injected during post-render, eliminating\
+  \ previous file-based parameterization.\n  * Image defaults for maas-api, maas-controller,\
+  \ payload-processing, and maas-api-key-cleanup are explicitly configurable.\n  *\
+  \ Deployment/installer now manages a ConfigMap for image overrides instead of env-var\
+  \ patching.\n  * Reduced unnecessary reconciliations previously triggered by deleted\
+  \ ConfigMaps.\n\n* **Improvements**\n  * Better handling and readiness processing\
+  \ for additional resource types (HTTPRoute, CronJob).\n<!-- end of auto-generated\
+  \ comment: release notes by coderabbit.ai -->\n\n## Files involved\n- `.github/hack/cleanup-odh.sh`\n\
+  - `.github/scripts/update-kustomize-tag.sh`\n- `.github/workflows/create-release.yml`\n\
+  - `AGENTS.md`\n- `README.md`\n- `deployment/base/maas-api/policies/auth-policy.yaml`\n\
+  - `deployment/base/maas-controller/default/params.env`\n- `deployment/base/maas-controller/manager/manager.yaml`\n\
+  - `deployment/components/shared-patches/kustomization.yaml`\n- `deployment/overlays/dev/params.env`\n\
+  - `docs/content/configuration-and-management/authorino-caching.md`\n- `docs/content/configuration-and-management/tls-configuration.md`\n\
+  - `docs/content/contributing/release-strategy.md`\n- `docs/content/contributing/testing-guide.md`\n\
+  - `maas-api/deploy/overlays/dev/kustomization.yaml`\n- `maas-api/deploy/overlays/dev/params.env`\n\
+  - `maas-api/deploy/overlays/odh/kustomization.yaml`\n- `maas-api/deploy/overlays/odh/params.env`\n\
+  - `maas-controller/README.md`\n- `maas-controller/cmd/manager/main.go`\n- `maas-controller/pkg/controller/maas/tenant_controller.go`\n\
+  - `maas-controller/pkg/controller/maas/tenant_reconcile.go`\n- `maas-controller/pkg/platform/tenantreconcile/apply.go`\n\
+  - `maas-controller/pkg/platform/tenantreconcile/constants.go`\n- `maas-controller/pkg/platform/tenantreconcile/params.go`\n\
+  - `maas-controller/pkg/platform/tenantreconcile/params_test.go`\n- `maas-controller/pkg/platform/tenantreconcile/pipeline.go`\n\
+  - `maas-controller/pkg/platform/tenantreconcile/postrender.go`\n- `maas-controller/pkg/platform/tenantreconcile/prerequisites.go`\n\
+  - `scripts/deploy.sh`\n- `scripts/deployment-helpers.sh`\n- `test/e2e/scripts/local-deploy.sh`\n"

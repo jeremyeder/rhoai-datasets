@@ -1,0 +1,29 @@
+prompt: "# feat(RHOAIENG-60867): controller: reconcile governance attachment into\
+  \ MaaSModelRef status\n\nAdd GovernanceAttached and RuntimeReady conditions to MaaSModelRef\n\
+  status so that phase and conditions reflect whether a model is covered\nby an active\
+  \ MaaSSubscription + MaaSAuthPolicy pairing.\n\nPhase semantics:\n- Pending: no\
+  \ governance pairing or backend not ready\n- Ready: governed and runtime-healthy\n\
+  - Unhealthy: governed but backend has a runtime failure\n- Failed/Invalid: reconciliation\
+  \ error or bad spec\n\nThe controller now watches MaaSSubscription and MaaSAuthPolicy\
+  \ for\nchanges and re-reconciles affected MaaSModelRef resources. No admin\nCR names,\
+  \ namespaces, or UIDs appear in any status field.\n\nIncludes unit tests for all\
+  \ governance scenarios: no pairing, active\npairing, pairing removed (GovernanceGap),\
+  \ runtime failure with\ngovernance, both failures, privacy checks, and mapper functions.\n\
+  \nCloses [RHOAIENG-60867](https://redhat.atlassian.net/browse/RHOAIENG-60867)\n\
+  Co-Authored-By: Claude <noreply@anthropic.com>\nSigned-off-by: Ishita Sequeira <isequeir@redhat.com>\n\
+  \n<!-- This is an auto-generated comment: release notes by coderabbit.ai -->\n##\
+  \ Summary by CodeRabbit\n\n* **New Features**\n  * Richer model status with explicit\
+  \ governance attachment and runtime health conditions; expanded Phase semantics\
+  \ and new condition types (GovernanceAttached, RuntimeReady) and reason values for\
+  \ clearer status reporting.\n\n* **Tests**\n  * Expanded unit and e2e tests covering\
+  \ governance interactions, pairing states, runtime failures, race conditions, and\
+  \ subscription/auth policy mappings.\n\n* **Chores**\n  * Updated monitoring and\
+  \ RBAC to manage pod monitors; lint/test config tweaks to support new checks and\
+  \ tests.\n<!-- end of auto-generated comment: release notes by coderabbit.ai -->\n\
+  \n## Files involved\n- `deployment/base/maas-controller/crd/bases/maas.opendatahub.io_maasauthpolicies.yaml`\n\
+  - `deployment/base/maas-controller/crd/bases/maas.opendatahub.io_maasmodelrefs.yaml`\n\
+  - `deployment/base/maas-controller/crd/bases/maas.opendatahub.io_maassubscriptions.yaml`\n\
+  - `maas-controller/.golangci.yml`\n- `maas-controller/api/maas/v1alpha1/common_types.go`\n\
+  - `maas-controller/api/maas/v1alpha1/maasmodelref_types.go`\n- `maas-controller/pkg/controller/maas/maasmodelref_controller.go`\n\
+  - `maas-controller/pkg/controller/maas/maasmodelref_controller_test.go`\n- `test/e2e/scripts/prow_run_smoke_test.sh`\n\
+  - `test/e2e/tests/test_subscription.py`\n"

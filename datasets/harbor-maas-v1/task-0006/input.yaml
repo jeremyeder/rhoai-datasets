@@ -1,0 +1,34 @@
+prompt: "# fix: mandate spec for MaaS CRs\n\n<!--- Provide a general summary of your\
+  \ changes in the Title above -->\nhttps://redhat.atlassian.net/browse/RHOAIENG-59640\n\
+  \n## Description\n<!--- Describe your changes in detail -->\nThis PR:\n1. mandates\
+  \ `spec` in MaaS CRs (MaaSAuthPolicy, MaaSSubscription, MaaSModelRef, Tenant); and\n\
+  2. for the first three, considers backward compat and reports `Invalid` when `spec`\
+  \ doesn't exist.\n\n## How Has This Been Tested?\n<!--- Please describe in detail\
+  \ how you tested your changes. -->\n<!--- Include details of your testing environment,\
+  \ and the tests you ran to -->\n<!--- see how your change affects other areas of\
+  \ the code, etc. -->\n1. Create no-spec CRs. Their phases remain empty.\n2. Deploy\
+  \ the PR image.\n3. Observe that no-spec CRs have `Invalid` phases.\n4. Try creating\
+  \ new no-spec CRs and get blocked.\n\n## Merge criteria:\n<!--- This PR will be\
+  \ merged by any repository approver when it meets all the points in the checklist\
+  \ -->\n<!--- Go over all the following points, and put an `x` in all the boxes that\
+  \ apply. -->\n\n- [x] The commits are squashed in a cohesive manner and have meaningful\
+  \ messages.\n- [x] Testing instructions have been added in the PR body (for PRs\
+  \ involving changes that are not immediately obvious).\n- [x] The developer has\
+  \ manually tested the changes and verified that the changes work\n\n\n<!-- This\
+  \ is an auto-generated comment: release notes by coderabbit.ai -->\n## Summary by\
+  \ CodeRabbit\n\n* **Bug Fixes**\n  * API validation now requires the top-level spec\
+  \ for MaaS resources; resources missing spec are rejected and show clear error messages.\n\
+  \  * Controllers now short-circuit on missing/empty spec: resources are marked Invalid\
+  \ (Ready=False, reason InvalidSpec), skip finalizer installation and further reconciliation.\n\
+  \n* **Tests**\n  * Added reconciliation tests for legacy/empty-spec resources to\
+  \ verify deterministic Invalid status and no finalizers.\n<!-- end of auto-generated\
+  \ comment: release notes by coderabbit.ai -->\n\n## Files involved\n- `deployment/base/maas-controller/crd/bases/maas.opendatahub.io_externalmodels.yaml`\n\
+  - `deployment/base/maas-controller/crd/bases/maas.opendatahub.io_maasauthpolicies.yaml`\n\
+  - `deployment/base/maas-controller/crd/bases/maas.opendatahub.io_maasmodelrefs.yaml`\n\
+  - `deployment/base/maas-controller/crd/bases/maas.opendatahub.io_maassubscriptions.yaml`\n\
+  - `maas-controller/api/maas/v1alpha1/common_types.go`\n- `maas-controller/api/maas/v1alpha1/externalmodel_types.go`\n\
+  - `maas-controller/api/maas/v1alpha1/maasauthpolicy_types.go`\n- `maas-controller/api/maas/v1alpha1/maasmodelref_types.go`\n\
+  - `maas-controller/api/maas/v1alpha1/maassubscription_types.go`\n- `maas-controller/pkg/controller/maas/maasauthpolicy_controller.go`\n\
+  - `maas-controller/pkg/controller/maas/maasauthpolicy_controller_test.go`\n- `maas-controller/pkg/controller/maas/maasmodelref_controller.go`\n\
+  - `maas-controller/pkg/controller/maas/maasmodelref_controller_test.go`\n- `maas-controller/pkg/controller/maas/maassubscription_controller.go`\n\
+  - `maas-controller/pkg/controller/maas/maassubscription_controller_test.go`\n"

@@ -35,33 +35,33 @@ def test_candidate_artifact_with_ai_detection():
         title="Fix auth bug",
         description="Fixes auth",
         ai_detection=AIDetectionResult(
-            overall_score=0.85,
-            per_artifact_scores={"src/auth.py": 0.95, "README.md": 0.1},
+            overall_score=85,
+            per_artifact_scores={"src/auth.py": 95, "README.md": 10},
             method="llm-as-judge",
             model="claude-sonnet-4-6",
         ),
     )
-    assert c.ai_detection.overall_score == 0.85
-    assert c.ai_detection.per_artifact_scores["src/auth.py"] == 0.95
+    assert c.ai_detection.overall_score == 85
+    assert c.ai_detection.per_artifact_scores["src/auth.py"] == 95
 
 
 def test_suitability_score_validates_range():
     s = SuitabilityScore(
-        clarity=0.8,
-        verifiability=0.9,
-        difficulty=0.5,
-        domain_relevance=0.7,
-        completeness=0.6,
+        clarity=80,
+        verifiability=90,
+        difficulty=50,
+        domain_relevance=70,
+        completeness=60,
     )
-    assert 0 <= s.overall <= 1.0
+    assert 0 <= s.overall <= 100
 
     with pytest.raises(ValidationError):
         SuitabilityScore(
-            clarity=1.5,
-            verifiability=0.9,
-            difficulty=0.5,
-            domain_relevance=0.7,
-            completeness=0.6,
+            clarity=150,
+            verifiability=90,
+            difficulty=50,
+            domain_relevance=70,
+            completeness=60,
         )
 
 
@@ -75,7 +75,7 @@ def test_dataset_metadata_minimum_valid():
         entries=[
             DatasetEntry(
                 candidate_url="https://github.com/org/repo/pull/42",
-                ai_generation_score=0.85,
+                ai_generation_score=85,
                 domain_tags=["auth", "security"],
                 difficulty=DifficultyLevel.medium,
             ),

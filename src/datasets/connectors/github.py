@@ -2,17 +2,38 @@
 
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
 
 from github import Github
 
 from datasets.metadata.schema import CandidateArtifact, SourceType
+from datasets.patterns import TEST_FILE_RE
+
+_DOCS_CONFIG_RE = re.compile(
+    r"\.(md|txt|yaml|yml|json|toml|cfg|ini|lock)$"
+    r"|^(README|LICENSE|CHANGELOG|OWNERS|CODEOWNERS|\.)",
+    re.IGNORECASE,
+)
+MAX_SOURCE_FILES = 50
 
 
 def _parse_since(since: str | None) -> datetime | None:
     if not since:
         return None
     return datetime.fromisoformat(since).replace(tzinfo=UTC)
+
+
+def _has_test_files(filenames: list[str]) -> bool:
+    return any(TEST_FILE_RE.search(f) for f in filenames)
+
+
+def _is_docs_config_only(filenames: list[str]) -> bool:
+    return all(_DOCS_CONFIG_RE.search(f) for f in filenames)
+
+
+def _source_file_count(filenames: list[str]) -> int:
+    return sum(1 for f in filenames if not TEST_FILE_RE.search(f))
 
 
 class GitHubConnector:
@@ -65,13 +86,21 @@ class GitHubConnector:
         since_dt = _parse_since(since)
         prs = self._repo.get_pulls(state=state, sort="updated", direction="desc")
 
-        for pr in prs[: limit * 3]:
+        for pr in prs[: limit * 10]:
             if since_dt and pr.updated_at < since_dt:
                 break
             if not pr.merged:
                 continue
             file_list = list(pr.get_files())
             files = [f.filename for f in file_list]
+
+            if not _has_test_files(files):
+                continue
+            if _is_docs_config_only(files):
+                continue
+            if _source_file_count(files) > MAX_SOURCE_FILES:
+                continue
+
             patches = {f.filename: (f.patch or "") for f in file_list}
             commit_messages = [c.commit.message for c in pr.get_commits()]
 
@@ -85,6 +114,13 @@ class GitHubConnector:
                         "number": pr.number,
                         "state": pr.state,
                         "merged": getattr(pr, "merged", False),
+                        "base_sha": pr.base.sha if pr.base else "",
+                        "repo_clone_url": (
+                            pr.base.repo.clone_url if pr.base and pr.base.repo else ""
+                        ),
+                        "repo_full_name": (
+                            pr.base.repo.full_name if pr.base and pr.base.repo else ""
+                        ),
                         "files": files,
                         "patches": patches,
                         "commit_messages": commit_messages,

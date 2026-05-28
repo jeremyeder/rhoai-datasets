@@ -1,0 +1,29 @@
+prompt: "# refactor: reconcile gateway configuration sources [RHOAIENG-62286]\n\n\
+  Thread the resolved gateway name and namespace from cmd/manager/main.go\nflags through\
+  \ to all downstream consumers, establishing a single source\nof truth. Previously,\
+  \ DefaultGatewayName and DefaultGatewayNamespace\nconstants in constants.go duplicated\
+  \ the flag defaults, and both the\nbootstrap (EnsureTenantGatewayDefaults) and reconcile\n\
+  (applyGatewayDefaults) paths consumed these constants instead of the\nresolved flag\
+  \ values.\n\nChanges:\n- Remove DefaultGatewayName/DefaultGatewayNamespace from\
+  \ constants.go\n- Add gatewayName/gatewayNamespace parameters to EnsureTenantGatewayDefaults\n\
+  - Add GatewayName/GatewayNamespace fields to TenantReconciler and convert\n  applyGatewayDefaults\
+  \ to a receiver method\n- Thread gateway values from main.go to ensureClusterBootstrapRunnable\n\
+  \  and TenantReconciler\n- Remove local constant aliases from MaaSModelRefReconciler\
+  \ and\n  externalmodel.Reconciler, inlining the fallback strings\n- Update tests\
+  \ to use inline string values\n\nCloses [RHOAIENG-62286](https://redhat.atlassian.net/browse/RHOAIENG-62286)\n\
+  \nCo-Authored-By: Claude <noreply@anthropic.com>\nSigned-off-by: Ryan Qin <yqin@redhat.com>\n\
+  \n<!-- This is an auto-generated comment: release notes by coderabbit.ai -->\n##\
+  \ Summary by CodeRabbit\n\n* **Refactor**\n  * Controllers now accept gateway configuration\
+  \ from startup flags so gateway defaults come from configured values rather than\
+  \ package-level defaults.\n  * Package-level gateway default constants were removed.\n\
+  \n* **Bug Fixes**\n  * Startup now validates gateway name and namespace and exits\
+  \ on missing values.\n  * Controllers/reporting now use configured gateway values\
+  \ and fail if unset instead of deriving defaults.\n\n* **Tests**\n  * Tests updated\
+  \ to use explicit gateway settings (maas-default-gateway in openshift-ingress).\n\
+  <!-- end of auto-generated comment: release notes by coderabbit.ai -->\n\n## Files\
+  \ involved\n- `maas-controller/cmd/manager/main.go`\n- `maas-controller/pkg/controller/maas/cross_namespace_test.go`\n\
+  - `maas-controller/pkg/controller/maas/maasauthpolicy_controller.go`\n- `maas-controller/pkg/controller/maas/maasmodelref_controller.go`\n\
+  - `maas-controller/pkg/controller/maas/maasmodelref_controller_test.go`\n- `maas-controller/pkg/controller/maas/tenant_controller.go`\n\
+  - `maas-controller/pkg/controller/maas/tenant_reconcile.go`\n- `maas-controller/pkg/controller/maas/tenant_reconcile_test.go`\n\
+  - `maas-controller/pkg/platform/tenantreconcile/constants.go`\n- `maas-controller/pkg/platform/tenantreconcile/kustomize.go`\n\
+  - `maas-controller/pkg/reconciler/externalmodel/reconciler.go`\n"

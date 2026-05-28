@@ -5,7 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 from datasets.connectors.base import SourceConnector
-from datasets.metadata.schema import CandidateArtifact, SourceType
+from datasets.metadata.schema import CandidateArtifact, DifficultyLevel, SourceType
 from datasets.recommender.pipeline import RecommenderPipeline
 
 
@@ -58,7 +58,38 @@ def test_pipeline_filters_by_min_suitability():
     mock_connector.scan.return_value = candidates
 
     pipeline = RecommenderPipeline(connectors=[mock_connector], skip_ai_detection=True)
-    results = pipeline.run(limit=10, min_suitability=0.5)
+    results = pipeline.run(limit=10, min_suitability=50)
 
     assert len(results) <= 2
-    assert all(c.suitability.overall >= 0.5 for c in results)
+    assert all(c.suitability.overall >= 50 for c in results)
+
+
+def test_pipeline_assigns_difficulty_bucket():
+    small_pr = _make_candidate(
+        "Tiny fix",
+        "One-liner.",
+        merged=True,
+        files=["src/a.py"],
+        patches={"src/a.py": "+x = 1"},
+    )
+    large_pr = _make_candidate(
+        "Major refactor",
+        "Rewrites the auth system with new middleware.",
+        merged=True,
+        files=[f"src/{c}.py" for c in "abcdefghij"] + ["tests/test_a.py"],
+        patches={
+            f"src/{c}.py": "\n".join(f"+line{i}" for i in range(80))
+            for c in "abcdefghij"
+        },
+    )
+
+    mock_connector = MagicMock(spec=SourceConnector)
+    mock_connector.scan.return_value = [small_pr, large_pr]
+
+    pipeline = RecommenderPipeline(connectors=[mock_connector], skip_ai_detection=True)
+    results = pipeline.run(limit=10, min_suitability=0.0)
+
+    assert all(c.difficulty_bucket is not None for c in results)
+    buckets = {c.title: c.difficulty_bucket for c in results}
+    assert buckets["Tiny fix"] == DifficultyLevel.easy
+    assert buckets["Major refactor"] == DifficultyLevel.hard

@@ -1,0 +1,44 @@
+prompt: "# chore: promote main to stable\n\nAutomated promotion of **16 commit(s)**\
+  \ from `main` to `stable`.\n\n```\n02f86ce fix: use odh-stable image tags in odh\
+  \ overlay and add dev overlay (#896)\n2bc0e66 test: add E2E tests for Tenant CR\
+  \ lifecycle (#869)\n90ea64a chore: fix CI failures (#932)\n7cebe73 chore: remove\
+  \ reviewers from OWNERS to disable prow auto-assignment (#931)\nfb76894 chore: restrict\
+  \ /lgtm to approvers and add CODEOWNERS for review assignment (#928)\n13a9ccd ci:\
+  \ harden promote-stable-to-rhoai merge step (#927)\n41b2aed docs: add ModelsAsService\
+  \ to Tenant CR transition to upgrade guide (#923)\n30744fa ci: replace PR-based\
+  \ stable\u2192rhoai promotion with direct merge commit (#926)\n47d0b3f chore: add\
+  \ isManaged check for all resources managed by maas-controller (#920)\n43bd2ba docs:\
+  \ update API key endpoints sample requests and responses (#921)\n9adb8b2 fix(maas-api):\
+  \ use ExternalModel name as model ID in GET /v1/models [RHOAIENG-63297] (#919)\n\
+  b4f20ec feat: add subscription filter to POST /api-keys/search (#918)\n6d40b19 refactor:\
+  \ reconcile gateway configuration sources [RHOAIENG-62286] (#909)\n9bebd69 feat(maas-api):\
+  \ enrich model refs with displayName and description in GET /subscriptions (#913)\n\
+  7f759eb feat(maas-api): enable TLS certificate validation for internal gateway calls\
+  \ (#707)\nfd24b95 fix: update default RHOAI operator channel from fast-3.x to stable-3.x\
+  \ (#908)\n```\n\n\n## Files involved\n- `.github/CODEOWNERS`\n- `.github/workflows/openapi-validation.yml`\n\
+  - `.github/workflows/promote-stable-to-rhoai.yml`\n- `CONTRIBUTING.md`\n- `OWNERS`\n\
+  - `README.md`\n- `deployment/base/maas-api/core/kustomization.yaml`\n- `deployment/base/maas-controller/manager/kustomization.yaml`\n\
+  - `deployment/overlays/dev/params.env`\n- `deployment/overlays/odh/params.env`\n\
+  - `docs/content/configuration-and-management/quota-and-access-configuration.md`\n\
+  - `docs/content/contributing/release-strategy.md`\n- `docs/content/contributing/testing-guide.md`\n\
+  - `docs/content/install/platform-setup.md`\n- `docs/content/migration/upgrade-to-3.4.md`\n\
+  - `docs/content/user-guide/api-key-management.md`\n- `docs/mkdocs.yml`\n- `maas-api/cmd/main.go`\n\
+  - `maas-api/deploy/overlays/dev/kustomization.yaml`\n- `maas-api/deploy/overlays/dev/params.env`\n\
+  - `maas-api/deploy/overlays/odh/params.env`\n- `maas-api/internal/api_keys/handler_test.go`\n\
+  - `maas-api/internal/api_keys/store_mock.go`\n- `maas-api/internal/api_keys/store_postgres.go`\n\
+  - `maas-api/internal/api_keys/types.go`\n- `maas-api/internal/handlers/models_test.go`\n\
+  - `maas-api/internal/models/discovery.go`\n- `maas-api/internal/models/discovery_test.go`\n\
+  - `maas-api/internal/models/maasmodelref.go`\n- `maas-api/internal/subscription/handler_test.go`\n\
+  - `maas-api/internal/subscription/selector.go`\n- `maas-api/internal/subscription/selector_test.go`\n\
+  - `maas-api/internal/subscription/types.go`\n- `maas-api/openapi3.yaml`\n- `maas-controller/cmd/manager/main.go`\n\
+  - `maas-controller/pkg/controller/maas/annotations.go`\n- `maas-controller/pkg/controller/maas/cross_namespace_test.go`\n\
+  - `maas-controller/pkg/controller/maas/maasauthpolicy_controller.go`\n- `maas-controller/pkg/controller/maas/maasmodelref_controller.go`\n\
+  - `maas-controller/pkg/controller/maas/maasmodelref_controller_test.go`\n- `maas-controller/pkg/controller/maas/tenant_controller.go`\n\
+  - `maas-controller/pkg/controller/maas/tenant_reconcile.go`\n- `maas-controller/pkg/controller/maas/tenant_reconcile_test.go`\n\
+  - `maas-controller/pkg/platform/tenantreconcile/constants.go`\n- `maas-controller/pkg/platform/tenantreconcile/kustomize.go`\n\
+  - `maas-controller/pkg/platform/tenantreconcile/postrender.go`\n- `maas-controller/pkg/reconciler/externalmodel/reconciler.go`\n\
+  - `maas-controller/pkg/reconciler/externalmodel/reconciler_test.go`\n- `scripts/README.md`\n\
+  - `scripts/deploy.sh`\n- `scripts/deployment-helpers.sh`\n- `test/e2e/README.md`\n\
+  - `test/e2e/fixtures/distinct/maas/maas-model.yaml`\n- `test/e2e/scripts/prow_run_smoke_test.sh`\n\
+  - `test/e2e/tests/test_api_keys.py`\n- `test/e2e/tests/test_config_tenant.py`\n\
+  - `test/e2e/tests/test_subscription_list_endpoints.py`\n- `test/e2e/tests/test_tenant.py`\n"
