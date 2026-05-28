@@ -38,6 +38,13 @@ def test_connector_protocol():
 
 def test_github_connector_scan_prs():
     """GitHubConnector.scan returns CandidateArtifacts from PRs."""
+    mock_base_repo = MagicMock()
+    mock_base_repo.clone_url = "https://github.com/org/repo.git"
+    mock_base_repo.full_name = "org/repo"
+    mock_base = MagicMock()
+    mock_base.sha = "abc123def456"
+    mock_base.repo = mock_base_repo
+
     mock_pr = MagicMock()
     mock_pr.number = 42
     mock_pr.title = "Fix null pointer in auth"
@@ -45,6 +52,7 @@ def test_github_connector_scan_prs():
     mock_pr.html_url = "https://github.com/org/repo/pull/42"
     mock_pr.state = "closed"
     mock_pr.merged = True
+    mock_pr.base = mock_base
     mock_pr.get_files.return_value = [
         MagicMock(
             filename="src/auth.py",
@@ -75,9 +83,9 @@ def test_github_connector_scan_prs():
     assert candidates[0].source_type == SourceType.github_pr
     assert candidates[0].title == "Fix null pointer in auth"
     assert "Co-Authored-By" in str(candidates[0].raw_data.get("commit_messages", ""))
-    assert "base_sha" in candidates[0].raw_data
-    assert "repo_clone_url" in candidates[0].raw_data
-    assert "repo_full_name" in candidates[0].raw_data
+    assert candidates[0].raw_data["base_sha"] == "abc123def456"
+    assert candidates[0].raw_data["repo_clone_url"] == "https://github.com/org/repo.git"
+    assert candidates[0].raw_data["repo_full_name"] == "org/repo"
 
 
 def test_github_connector_name():
