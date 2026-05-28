@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import os
 import re
 import shlex
 import textwrap
@@ -218,7 +219,10 @@ class HarborTaskFactory:
         if source_patches:
             combined_patch = ""
             for fname, patch in source_patches.items():
-                combined_patch += f"--- a/{fname}\n+++ b/{fname}\n{patch}\n"
+                safe_fname = os.path.normpath(fname).lstrip("/")
+                if ".." in safe_fname or os.path.isabs(safe_fname):
+                    continue
+                combined_patch += f"--- a/{safe_fname}\n+++ b/{safe_fname}\n{patch}\n"
             patch_b64 = base64.b64encode(combined_patch.encode()).decode()
 
             solve_sh = (

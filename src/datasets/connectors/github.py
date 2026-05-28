@@ -114,9 +114,13 @@ class GitHubConnector:
                         "number": pr.number,
                         "state": pr.state,
                         "merged": getattr(pr, "merged", False),
-                        "base_sha": pr.base.sha,
-                        "repo_clone_url": pr.base.repo.clone_url,
-                        "repo_full_name": pr.base.repo.full_name,
+                        "base_sha": pr.base.sha if pr.base else "",
+                        "repo_clone_url": (
+                            pr.base.repo.clone_url if pr.base and pr.base.repo else ""
+                        ),
+                        "repo_full_name": (
+                            pr.base.repo.full_name if pr.base and pr.base.repo else ""
+                        ),
                         "files": files,
                         "patches": patches,
                         "commit_messages": commit_messages,
