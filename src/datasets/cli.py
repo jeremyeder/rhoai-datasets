@@ -228,4 +228,9 @@ def create_dataset(input_file: Path, fmt: str, output_dir: Path) -> None:
         result = factory.create(candidate, output_dir=output_dir, task_name=task_name)
         click.echo(f"  Created: {result}")
 
+    if fmt == "harbor":
+        dataset_name = output_dir.name
+        factory.create_dataset_toml(output_dir, dataset_name)
+        click.echo(f"  Created: {output_dir / 'dataset.toml'}")
+
     click.echo(f"Created {len(candidates)} {fmt} tasks in {output_dir}")

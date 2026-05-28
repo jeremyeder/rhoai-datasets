@@ -27,6 +27,11 @@ def _extract_added_lines(patch: str) -> str:
     return "\n".join(lines)
 
 
+def _repo_slug(repo_full_name: str) -> str:
+    """Convert 'org/repo-name' to 'repo-name'."""
+    return repo_full_name.split("/")[-1] if "/" in repo_full_name else repo_full_name
+
+
 class HarborTaskFactory:
     @property
     def format_name(self) -> str:
@@ -43,11 +48,20 @@ class HarborTaskFactory:
 
         self._write_instruction(task_dir, candidate)
         self._write_toml(task_dir, candidate, task_name)
-        self._write_dockerfile(task_dir)
+        self._write_dockerfile(task_dir, candidate)
         self._write_tests(task_dir, candidate)
         self._write_solution(task_dir, candidate)
 
         return task_dir
+
+    def create_dataset_toml(self, output_dir: Path, dataset_name: str) -> None:
+        toml = textwrap.dedent(f"""\
+            [dataset]
+            name = "rhai/{dataset_name}"
+            version = "1.0.0"
+            description = "Auto-generated dataset from rhai-datasets"
+        """)
+        (output_dir / "dataset.toml").write_text(toml)
 
     def _write_instruction(self, task_dir: Path, candidate: CandidateArtifact) -> None:
         content = f"# {candidate.title}\n\n{candidate.description}\n"
@@ -65,8 +79,11 @@ class HarborTaskFactory:
             if candidate.difficulty_bucket
             else "medium"
         )
+        repo_slug = _repo_slug(candidate.raw_data.get("repo_full_name", "unknown"))
+        name = f"rhai-github/{repo_slug}/{task_name}"
         toml = textwrap.dedent(f"""\
             version = "1.0"
+            name = "{name}"
 
             [metadata]
             author_name = "rhai-datasets"
@@ -90,14 +107,38 @@ class HarborTaskFactory:
         """)
         (task_dir / "task.toml").write_text(toml)
 
-    def _write_dockerfile(self, task_dir: Path) -> None:
+    def _write_dockerfile(self, task_dir: Path, candidate: CandidateArtifact) -> None:
         env_dir = task_dir / "environment"
         env_dir.mkdir(exist_ok=True)
-        dockerfile = textwrap.dedent("""\
-            FROM python:3.12-slim
-            ENV DEBIAN_FRONTEND=noninteractive
-            WORKDIR /root
-        """)
+
+        repo_url = candidate.raw_data.get("repo_clone_url", "")
+        base_sha = candidate.raw_data.get("base_sha", "")
+
+        if repo_url and base_sha:
+            dockerfile = textwrap.dedent(f"""\
+                FROM python:3.12-slim
+                ENV DEBIAN_FRONTEND=noninteractive
+                RUN apt-get update && apt-get install -y --no-install-recommends \\
+                    git curl patch && rm -rf /var/lib/apt/lists/*
+                RUN curl -LsSf https://astral.sh/uv/0.7.13/install.sh | sh
+                WORKDIR /testbed
+                RUN git clone {repo_url} /testbed \\
+                    && git checkout {base_sha}
+                COPY instruction.md /app/instruction.md
+                COPY tests/ /tests/
+                COPY solution/ /solution/
+                RUN mkdir -p /logs/verifier
+            """)
+        else:
+            dockerfile = textwrap.dedent("""\
+                FROM python:3.12-slim
+                ENV DEBIAN_FRONTEND=noninteractive
+                RUN apt-get update && apt-get install -y --no-install-recommends \\
+                    git curl patch && rm -rf /var/lib/apt/lists/*
+                WORKDIR /app
+                RUN mkdir -p /logs/verifier
+            """)
+
         (env_dir / "Dockerfile").write_text(dockerfile)
 
     def _write_tests(self, task_dir: Path, candidate: CandidateArtifact) -> None:

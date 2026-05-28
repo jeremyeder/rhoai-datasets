@@ -198,3 +198,68 @@ def test_harbor_factory_solve_sh_fallback_without_patches(tmp_path):
 
     solve_sh = (task_dir / "solution" / "solve.sh").read_text()
     assert "No source patches" in solve_sh
+
+
+def test_harbor_factory_dockerfile_clones_repo(tmp_path):
+    factory = HarborTaskFactory()
+    candidate = CandidateArtifact(
+        source_type=SourceType.github_pr,
+        source_url="https://github.com/org/repo/pull/42",
+        title="Fix auth",
+        description="Fix.",
+        raw_data={
+            "merged": True,
+            "files": ["src/auth.py", "tests/test_auth.py"],
+            "patches": {"src/auth.py": "+fix"},
+            "base_sha": "abc123def456",
+            "repo_clone_url": "https://github.com/org/repo.git",
+            "repo_full_name": "org/repo",
+        },
+    )
+    task_dir = factory.create(candidate, output_dir=tmp_path, task_name="t1")
+
+    dockerfile = (task_dir / "environment" / "Dockerfile").read_text()
+    assert "git clone https://github.com/org/repo.git" in dockerfile
+    assert "git checkout abc123def456" in dockerfile
+    assert "COPY instruction.md /app/instruction.md" in dockerfile
+    assert "COPY tests/ /tests/" in dockerfile
+    assert "COPY solution/ /solution/" in dockerfile
+
+
+def test_harbor_factory_dockerfile_fallback_without_repo_info(tmp_path):
+    factory = HarborTaskFactory()
+    candidate = _make_bug_fix_candidate()
+    task_dir = factory.create(candidate, output_dir=tmp_path, task_name="t2")
+
+    dockerfile = (task_dir / "environment" / "Dockerfile").read_text()
+    assert "git clone" not in dockerfile
+    assert "WORKDIR /app" in dockerfile
+
+
+def test_harbor_factory_toml_has_name(tmp_path):
+    factory = HarborTaskFactory()
+    candidate = CandidateArtifact(
+        source_type=SourceType.github_pr,
+        source_url="https://github.com/org/repo/pull/42",
+        title="Fix auth",
+        description="Fix.",
+        raw_data={
+            "merged": True,
+            "files": ["src/auth.py"],
+            "patches": {},
+            "repo_full_name": "org/my-repo",
+        },
+    )
+    task_dir = factory.create(candidate, output_dir=tmp_path, task_name="task-0001")
+
+    toml_content = (task_dir / "task.toml").read_text()
+    assert 'name = "rhai-github/my-repo/task-0001"' in toml_content
+
+
+def test_harbor_factory_creates_dataset_toml(tmp_path):
+    factory = HarborTaskFactory()
+    factory.create_dataset_toml(tmp_path, "test-dataset")
+
+    assert (tmp_path / "dataset.toml").is_file()
+    content = (tmp_path / "dataset.toml").read_text()
+    assert 'name = "rhai/test-dataset"' in content
