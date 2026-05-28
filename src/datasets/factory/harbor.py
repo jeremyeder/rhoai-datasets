@@ -2,10 +2,26 @@
 
 from __future__ import annotations
 
+import re
 import textwrap
 from pathlib import Path
 
 from datasets.metadata.schema import CandidateArtifact
+
+_TEST_FILE_RE = re.compile(r"(^|/)tests?[/_]|_test\.|test_", re.IGNORECASE)
+
+
+def _extract_added_lines(patch: str) -> str:
+    """Extract only added lines from a unified diff patch."""
+    lines = []
+    for line in patch.split("\n"):
+        if line.startswith("@@"):
+            continue
+        if line.startswith("+"):
+            lines.append(line[1:])
+        elif not line.startswith("-"):
+            lines.append(line)
+    return "\n".join(lines)
 
 
 class HarborTaskFactory:
@@ -85,11 +101,40 @@ class HarborTaskFactory:
         tests_dir = task_dir / "tests"
         tests_dir.mkdir(exist_ok=True)
 
-        test_sh = textwrap.dedent("""\
+        patches = candidate.raw_data.get("patches", {})
+        test_patches = {
+            fname: patch
+            for fname, patch in patches.items()
+            if _TEST_FILE_RE.search(fname)
+        }
+
+        extracted_names: list[str] = []
+        for filepath, patch in test_patches.items():
+            filename = Path(filepath).name
+            content = _extract_added_lines(patch)
+            if content.strip():
+                (tests_dir / filename).write_text(content)
+                extracted_names.append(filename)
+
+        if not extracted_names:
+            (tests_dir / "test_outputs.py").write_text(
+                textwrap.dedent("""\
+                \"\"\"Auto-generated test scaffold. Requires manual enrichment.\"\"\"
+
+
+                class TestOutputs:
+                    def test_task_completed(self):
+                        assert True, "Placeholder -- add real verification"
+            """)
+            )
+            extracted_names.append("test_outputs.py")
+
+        test_targets = " ".join(f"/tests/{n}" for n in extracted_names)
+        test_sh = textwrap.dedent(f"""\
             #!/bin/bash
             mkdir -p /logs/verifier
             uvx --with pytest==8.4.1 --with pytest-json-ctrf==0.3.5 \\
-              pytest --ctrf /logs/verifier/ctrf.json /tests/test_outputs.py -rA -v
+              pytest --ctrf /logs/verifier/ctrf.json {test_targets} -rA -v
             if [ $? -eq 0 ]; then echo 1 > /logs/verifier/reward.txt; else echo 0 > /logs/verifier/reward.txt; fi
             exit 0
         """)
@@ -97,27 +142,38 @@ class HarborTaskFactory:
         test_sh_path.write_text(test_sh)
         test_sh_path.chmod(0o755)
 
-        test_py = textwrap.dedent("""\
-            \"\"\"Auto-generated test scaffold. Requires manual enrichment.\"\"\"
-            import os
-
-
-            class TestOutputs:
-                def test_task_completed(self):
-                    # TODO: Add specific verification for this task
-                    assert True, "Placeholder -- add real verification"
-        """)
-        (tests_dir / "test_outputs.py").write_text(test_py)
-
     def _write_solution(self, task_dir: Path, candidate: CandidateArtifact) -> None:
         solution_dir = task_dir / "solution"
         solution_dir.mkdir(exist_ok=True)
-        solve_sh = textwrap.dedent("""\
-            #!/bin/bash
-            set -e
-            # TODO: Implement oracle solution based on the source fix
-            echo "Oracle solution placeholder"
-        """)
+
+        patches = candidate.raw_data.get("patches", {})
+        source_patches = {
+            fname: patch
+            for fname, patch in patches.items()
+            if not _TEST_FILE_RE.search(fname) and patch.strip()
+        }
+
+        if source_patches:
+            combined_patch = ""
+            for fname, patch in source_patches.items():
+                combined_patch += f"--- a/{fname}\n+++ b/{fname}\n{patch}\n"
+
+            solve_sh = (
+                "#!/bin/bash\n"
+                "set -e\n"
+                "cat > /tmp/solution.patch << '__SOLUTION_PATCH__'\n"
+                f"{combined_patch}"
+                "__SOLUTION_PATCH__\n"
+                "cd /testbed\n"
+                "patch --fuzz=5 -p1 -i /tmp/solution.patch\n"
+            )
+        else:
+            solve_sh = textwrap.dedent("""\
+                #!/bin/bash
+                set -e
+                echo "No source patches available for oracle solution"
+            """)
+
         solve_path = solution_dir / "solve.sh"
         solve_path.write_text(solve_sh)
         solve_path.chmod(0o755)
