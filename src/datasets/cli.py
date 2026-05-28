@@ -150,13 +150,23 @@ def recommend(
     results = pipeline.run(limit=limit, min_suitability=min_score, **extra_kwargs)
 
     click.echo(f"Found {len(results)} candidates (min score: {min_score})")
+    bucket_counts: dict[str, int] = {"easy": 0, "medium": 0, "hard": 0}
     for c in results:
         ai_flag = ""
         if c.ai_detection:
             ai_flag = f"  AI: {c.ai_detection.overall_score:.0f}"
         suitability = c.suitability
         score = suitability.overall if suitability else 0.0
-        click.echo(f"  [{score:3.0f}] {c.title[:60]:60s}{ai_flag}")
+        bucket = f"  [{c.difficulty_bucket.value}]" if c.difficulty_bucket else ""
+        click.echo(f"  [{score:3.0f}] {c.title[:55]:55s}{bucket}{ai_flag}")
+        if c.difficulty_bucket:
+            bucket_counts[c.difficulty_bucket.value] += 1
+    click.echo(
+        f"\nDifficulty: "
+        f"easy={bucket_counts['easy']}  "
+        f"medium={bucket_counts['medium']}  "
+        f"hard={bucket_counts['hard']}"
+    )
 
     if output:
         data = [c.model_dump(mode="json") for c in results]

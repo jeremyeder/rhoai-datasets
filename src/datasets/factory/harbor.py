@@ -41,14 +41,19 @@ class HarborTaskFactory:
     def _write_toml(
         self, task_dir: Path, candidate: CandidateArtifact, task_name: str
     ) -> None:
+        difficulty = (
+            candidate.difficulty_bucket.value
+            if candidate.difficulty_bucket
+            else "medium"
+        )
         toml = textwrap.dedent(f"""\
             version = "1.0"
 
             [metadata]
             author_name = "rhai-datasets"
             author_email = ""
-            difficulty = "medium"
-            difficulty_explanation = "Auto-generated from {candidate.source_type.value}"
+            difficulty = "{difficulty}"
+            difficulty_explanation = "Estimated from patch size, file count, and component spread"
             category = "{candidate.source_type.value}"
             tags = ["auto-generated", "{candidate.source_type.value}"]
 

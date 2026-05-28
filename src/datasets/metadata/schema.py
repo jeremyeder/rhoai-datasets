@@ -66,6 +66,7 @@ class CandidateArtifact(BaseModel):
     suitability: SuitabilityScore | None = None
     ai_detection: AIDetectionResult | None = None
     suggested_eval_type: EvalType | None = None
+    difficulty_bucket: DifficultyLevel | None = None
 
 
 class DatasetEntry(BaseModel):

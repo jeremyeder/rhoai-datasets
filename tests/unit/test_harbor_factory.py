@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datasets.factory.harbor import HarborTaskFactory
-from datasets.metadata.schema import CandidateArtifact, SourceType
+from datasets.metadata.schema import CandidateArtifact, DifficultyLevel, SourceType
 
 
 def _make_bug_fix_candidate() -> CandidateArtifact:
@@ -53,3 +53,35 @@ def test_harbor_factory_toml_has_metadata(tmp_path):
     assert "version" in toml_content
     assert "metadata" in toml_content
     assert "verifier" in toml_content
+
+
+def test_harbor_factory_uses_difficulty_bucket(tmp_path):
+    factory = HarborTaskFactory()
+    candidate = CandidateArtifact(
+        source_type=SourceType.github_pr,
+        source_url="https://github.com/org/repo/pull/99",
+        title="Major auth refactor",
+        description="Complete rewrite of auth middleware.",
+        raw_data={
+            "merged": True,
+            "files": ["src/auth.py", "src/middleware.py", "tests/test_auth.py"],
+            "patches": {
+                "src/auth.py": "+new code",
+                "src/middleware.py": "+new code",
+            },
+        },
+        difficulty_bucket=DifficultyLevel.hard,
+    )
+    task_dir = factory.create(candidate, output_dir=tmp_path, task_name="hard-task")
+
+    toml_content = (task_dir / "task.toml").read_text()
+    assert 'difficulty = "hard"' in toml_content
+
+
+def test_harbor_factory_defaults_to_medium_without_bucket(tmp_path):
+    factory = HarborTaskFactory()
+    candidate = _make_bug_fix_candidate()
+    task_dir = factory.create(candidate, output_dir=tmp_path, task_name="no-bucket")
+
+    toml_content = (task_dir / "task.toml").read_text()
+    assert 'difficulty = "medium"' in toml_content
