@@ -75,6 +75,9 @@ def test_github_connector_scan_prs():
     assert candidates[0].source_type == SourceType.github_pr
     assert candidates[0].title == "Fix null pointer in auth"
     assert "Co-Authored-By" in str(candidates[0].raw_data.get("commit_messages", ""))
+    assert "base_sha" in candidates[0].raw_data
+    assert "repo_clone_url" in candidates[0].raw_data
+    assert "repo_full_name" in candidates[0].raw_data
 
 
 def test_github_connector_name():
